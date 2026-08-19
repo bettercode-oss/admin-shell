@@ -41,3 +41,5 @@ AdminShell
 
 - Sidebar/Topbar는 서버 컴포넌트로 유지 (상태 필요시 얇은 client Provider만 내부에 추가)
 - 라우팅 비의존: Slot 기반 asChild 패턴으로 `<a>` / `<Link>` 주입은 소비자 책임
+- 셸이 제공하는 아이콘 버튼은 아이콘을 `children` 기본값으로 둔다
+  (상태별 표현은 `useShellState()` 를 쓰는 소비자 몫)
