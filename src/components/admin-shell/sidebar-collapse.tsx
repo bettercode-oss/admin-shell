@@ -15,10 +15,21 @@ import { useShellState } from "./shell-context"
 /**
  * 사이드바 접기/펼치기 버튼. SidebarHeaderActions 안에 넣는 것을 전제로 한다.
  * 라벨은 화면에 읽히는 문구라 props 로 덮어쓸 수 있게 열어둔다.
+ *
+ * 아이콘은 children 의 기본값이라 그대로 덮어쓸 수 있다. lucide 가 아닌 아이콘
+ * 세트를 쓰는 프로젝트도 컴포넌트를 복사해 고칠 필요가 없다.
+ *
+ *   <SidebarCollapseToggle><Bars3Icon className="size-4" /></SidebarCollapseToggle>
+ *
+ * 접힘/펼침에 따라 아이콘을 바꾸고 싶으면 useShellState() 로 소비자가 만든다 —
+ * 상태별 아이콘 prop 을 따로 두지 않는다.
  */
 function SidebarCollapseToggle({
   collapseLabel = "사이드바 접기",
   expandLabel = "사이드바 펼치기",
+  // children 을 구조 분해로 빼내는 것이 핵심이다. props 에 남겨두면 아래 JSX 자식이
+  // props.children 을 덮어써서, 소비자가 넘긴 아이콘이 조용히 무시된다.
+  children = <PanelLeft />,
   onClick,
   ...props
 }: React.ComponentProps<typeof Button> & {
@@ -44,7 +55,7 @@ function SidebarCollapseToggle({
           }}
           {...props}
         >
-          <PanelLeft />
+          {children}
         </Button>
       </TooltipTrigger>
       <TooltipContent side="right">{label}</TooltipContent>
