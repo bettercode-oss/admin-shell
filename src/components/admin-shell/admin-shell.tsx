@@ -3,28 +3,38 @@ import * as React from "react"
 import { TooltipProvider } from "@/components/ui/tooltip"
 import { cn } from "@/lib/utils"
 
+import { ShellRoot } from "./shell-context"
+
 /**
  * 셸 전체 치수. CSS 변수로 노출하므로 소비자가 style 로 덮어쓸 수 있고,
  * 접기 애니메이션도 변수 값 전환만으로 처리된다.
  */
 const shellVars = {
   "--admin-shell-sidebar-width": "16rem",
+  "--admin-shell-sidebar-width-collapsed": "4rem",
   "--admin-shell-topbar-height": "3.5rem",
   // 활성 항목 배경을 전경색 쪽으로 얼마나 섞을지. 값만 바꾸면 즉시 반영된다.
   "--admin-shell-active-mix": "3%",
 } as React.CSSProperties
 
-function AdminShell({ className, style, ...props }: React.ComponentProps<"div">) {
+function AdminShell({
+  className,
+  style,
+  ...props
+}: React.ComponentProps<typeof ShellRoot>) {
   return (
     <TooltipProvider>
-      <div
-        data-slot="admin-shell"
+      <ShellRoot
         style={{ ...shellVars, ...style }}
         className={cn(
-          "grid h-svh w-full bg-background text-foreground",
+          "group/shell grid h-svh w-full bg-background text-foreground",
           "grid-cols-[var(--admin-shell-sidebar-width)_1fr]",
           "grid-rows-[var(--admin-shell-topbar-height)_minmax(0,1fr)]",
           "[grid-template-areas:'sidebar_topbar''sidebar_content']",
+          // 접힘. 인라인 style 과 충돌하지 않도록 폭 변수가 아니라 그리드 정의를 바꾼다.
+          "data-collapsed:grid-cols-[var(--admin-shell-sidebar-width-collapsed)_1fr]",
+          "transition-[grid-template-columns] duration-200 ease-out",
+          "motion-reduce:transition-none",
           className
         )}
         {...props}
