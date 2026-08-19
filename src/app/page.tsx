@@ -12,8 +12,11 @@ import {
   AdminShell,
   ShellContent,
   Sidebar,
+  SidebarCollapseToggle,
   SidebarFooter,
   SidebarHeader,
+  SidebarHeaderActions,
+  SidebarHeaderTitle,
   SidebarNav,
   SidebarNavItem,
   Topbar,
@@ -39,11 +42,22 @@ export default function Page() {
   return (
     <AdminShell>
       <Sidebar>
-        <SidebarHeader>admin-shell</SidebarHeader>
+        <SidebarHeader>
+          <SidebarHeaderTitle>admin-shell</SidebarHeaderTitle>
+          <SidebarHeaderActions>
+            <SidebarCollapseToggle />
+          </SidebarHeaderActions>
+        </SidebarHeader>
 
         <SidebarNav aria-label="주요 메뉴">
           {nav.map(({ label, href, icon: Icon, active }) => (
-            <SidebarNavItem key={href} icon={<Icon />} active={active} asChild>
+            <SidebarNavItem
+              key={href}
+              icon={<Icon />}
+              tooltip={label}
+              active={active}
+              asChild
+            >
               <Link href={href}>
                 <span>{label}</span>
               </Link>
