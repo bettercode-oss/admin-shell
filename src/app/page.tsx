@@ -21,6 +21,8 @@ import {
 } from "@/components/admin-shell"
 import { Button } from "@/components/ui/button"
 
+import { ThemeToggle } from "./theme-toggle"
+
 /**
  * 컴포넌트 프리뷰/데모. 실제 제품 데이터가 아니라 하드코딩한 더미다.
  * 활성 항목은 라우터가 아니라 active prop 으로 주입한다는 점을 보여준다.
@@ -58,6 +60,7 @@ export default function Page() {
 
       <Topbar title="대시보드">
         <TopbarActions>
+          <ThemeToggle />
           <Button variant="ghost" size="icon" aria-label="알림">
             <Bell />
           </Button>
