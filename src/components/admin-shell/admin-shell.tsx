@@ -33,6 +33,9 @@ function AdminShell({
           "[grid-template-areas:'sidebar_topbar''sidebar_content']",
           // 접힘. 인라인 style 과 충돌하지 않도록 폭 변수가 아니라 그리드 정의를 바꾼다.
           "data-collapsed:grid-cols-[var(--admin-shell-sidebar-width-collapsed)_1fr]",
+          // 좁은 화면에서는 사이드바가 드로어로 빠지므로 칸 자체를 없앤다
+          "max-md:grid-cols-[minmax(0,1fr)]",
+          "max-md:[grid-template-areas:'topbar''content']",
           "transition-[grid-template-columns] duration-200 ease-out",
           "motion-reduce:transition-none",
           className

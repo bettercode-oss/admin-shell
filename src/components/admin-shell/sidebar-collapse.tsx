@@ -9,6 +9,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip"
+import { cn } from "@/lib/utils"
 
 import { useShellState } from "./shell-context"
 
@@ -25,6 +26,7 @@ import { useShellState } from "./shell-context"
  * 상태별 아이콘 prop 을 따로 두지 않는다.
  */
 function SidebarCollapseToggle({
+  className,
   collapseLabel = "사이드바 접기",
   expandLabel = "사이드바 펼치기",
   // children 을 구조 분해로 빼내는 것이 핵심이다. props 에 남겨두면 아래 JSX 자식이
@@ -46,6 +48,8 @@ function SidebarCollapseToggle({
           data-slot="sidebar-collapse-toggle"
           variant="ghost"
           size="icon-sm"
+          // 좁은 화면에서는 사이드바가 드로어라 접을 대상이 없다
+          className={cn("max-md:hidden", className)}
           aria-label={label}
           aria-expanded={!collapsed}
           aria-controls="admin-shell-sidebar"
