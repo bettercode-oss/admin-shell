@@ -10,6 +10,8 @@ import { cn } from "@/lib/utils"
 const shellVars = {
   "--admin-shell-sidebar-width": "16rem",
   "--admin-shell-topbar-height": "3.5rem",
+  // 활성 항목 배경을 전경색 쪽으로 얼마나 섞을지. 값만 바꾸면 즉시 반영된다.
+  "--admin-shell-active-mix": "3%",
 } as React.CSSProperties
 
 function AdminShell({ className, style, ...props }: React.ComponentProps<"div">) {
