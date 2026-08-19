@@ -1,5 +1,8 @@
 @AGENTS.md
 
+## 작업 시작 전
+- 셸 레이아웃을 건드리는 작업이면 ARCHITECTURE.md를 먼저 읽을 것
+
 ## 이 프로젝트의 원칙
 - admin-shell은 순수 레이아웃/UI 컴포넌트 라이브러리다. 어떤 제품(KBO, dicpress 등)의
   데이터 모델이나 API 호출 코드도 여기 들어가면 안 된다.
