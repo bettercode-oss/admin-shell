@@ -9,12 +9,27 @@ grid-template-areas: "sidebar topbar" "sidebar content"
 ## CSS Variables
 
 ```
---admin-shell-sidebar-width
---admin-shell-topbar-height
---admin-shell-active-mix
+--admin-shell-sidebar-width            펼친 폭, 기본 16rem
+--admin-shell-sidebar-width-collapsed  접힌 폭, 기본 4rem
+--admin-shell-topbar-height            기본 3.5rem
+--admin-shell-active-mix               활성 항목 배경 혼합 비율, 기본 3%
 ```
 
-(2단계에서 값만 바꾸면 접기/펼치기 — JS 리렌더 없음)
+### 접기는 폭 변수를 바꾸지 않는다
+
+`--admin-shell-sidebar-width` 의 값을 바꾸는 방식이 아니다. 이 변수는 `AdminShell` 이
+인라인 `style` 로 선언하는데, **인라인 style 은 클래스보다 항상 우선**하므로 클래스로
+덮어쓸 수 없다. 그래서 접힘은 `grid-template-columns` 자체를 교체한다.
+
+```
+grid-cols-[var(--admin-shell-sidebar-width)_1fr]
+data-collapsed:grid-cols-[var(--admin-shell-sidebar-width-collapsed)_1fr]
+transition-[grid-template-columns] duration-200 ease-out
+```
+
+덕분에 `--admin-shell-sidebar-width` 는 "펼친 폭"이라는 의미를 유지하고, 소비자는
+`style` 로 그대로 덮어쓸 수 있다. 상태가 바뀌면 `ShellRoot` 는 리렌더되지만 폭 전환
+자체는 CSS transition 이 처리한다.
 
 `--admin-shell-active-mix` 는 사이드바 활성 항목 배경을 `--sidebar-accent` 에서
 `--sidebar-foreground` 쪽으로 얼마나 섞을지의 비율이다. 기본 3%.
@@ -31,11 +46,32 @@ grid-template-areas: "sidebar topbar" "sidebar content"
 ## Component Tree
 
 ```
-AdminShell
-├── Sidebar (SidebarHeader / SidebarNav / SidebarNavItem / SidebarFooter)
+AdminShell                         TooltipProvider + ShellRoot(상태) + 그리드
+├── Sidebar
+│   ├── SidebarHeader
+│   │   ├── SidebarHeaderTitle     접히면 숨는다
+│   │   └── SidebarHeaderActions
+│   │       └── SidebarCollapseToggle
+│   ├── SidebarNav
+│   │   └── SidebarNavItem         icon / active / tooltip / asChild
+│   └── SidebarFooter
 ├── Topbar (TopbarTitle / TopbarActions)
 └── ShellContent (children, min-h-0 overflow-y-auto)
 ```
+
+## 서버/클라이언트 경계
+
+```
+서버 컴포넌트 : admin-shell.tsx, sidebar.tsx, topbar.tsx
+클라이언트    : shell-context.tsx      ShellRoot(상태), useShellState()
+                sidebar-collapse.tsx   SidebarCollapseToggle, SidebarTooltip
+```
+
+접힘 상태는 셸 루트의 `data-collapsed` 를 `group-data-collapsed/shell:` 변형으로 읽어
+**CSS 만으로** 처리한다. 그래서 Sidebar/Topbar 에 상태가 필요 없다.
+
+예외는 툴팁이다. 포털로 `body` 에 렌더되어 group 변형이 닿지 않으므로 접힘 여부를
+JS 로 알아야 하고, 그 부분만 `sidebar-collapse.tsx` 로 분리했다.
 
 ## 확장 시 주의점
 
