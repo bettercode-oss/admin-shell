@@ -38,8 +38,8 @@ const ShellContext = React.createContext<ShellContextValue | null>(null)
 
 /**
  * Provider 없이도 동작한다. 훅은 항상 같은 순서로 호출하고 Context 가 있을 때만
- * 그 값을 쓴다 — 파일 단위로 복사해간 프로젝트에서 컴포넌트가 스스로 상태를 들고
- * 동작하게 하기 위한 장치다.
+ * 그 값을 쓴다 — AdminShell 없이 Sidebar 만 가져다 쓰는 경우에도 컴포넌트가 스스로
+ * 상태를 들고 동작하게 하기 위한 장치다.
  */
 function useShellState(): ShellContextValue {
   const context = React.useContext(ShellContext)

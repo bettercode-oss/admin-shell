@@ -6,8 +6,10 @@ import { cn } from "@/lib/utils"
 import { ShellRoot } from "./shell-context"
 
 /**
- * 셸 전체 치수. CSS 변수로 노출하므로 소비자가 style 로 덮어쓸 수 있고,
- * 접기 애니메이션도 변수 값 전환만으로 처리된다.
+ * 셸 전체 치수. CSS 변수로 노출하므로 소비자가 style 로 덮어쓸 수 있다.
+ *
+ * 인라인 style 로 선언되는 점이 중요하다 — 인라인은 클래스보다 항상 우선하므로
+ * 접기는 이 변수 값을 바꾸는 방식이 될 수 없다. 아래 grid 정의 교체를 참고.
  */
 const shellVars = {
   "--admin-shell-sidebar-width": "16rem",

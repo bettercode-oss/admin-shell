@@ -72,7 +72,9 @@ function SidebarCollapseToggle({
  * 불필요한 Radix 트리를 만들지 않는다.
  *
  * 툴팁 내용은 포털로 body 에 렌더되므로 CSS 만으로는 접힘 상태를 알 수 없다.
- * 이 컴포넌트가 sidebar.tsx 에서 유일하게 클라이언트인 부분인 이유다.
+ * 접힘을 group-data-collapsed/shell 변형으로 처리하는 다른 부분과 달리 이 조각만
+ * 클라이언트여야 하는 이유다. sidebar.tsx 는 이것과 SidebarFrame 을 빌려 쓰면서도
+ * 자신은 서버 컴포넌트로 남는다.
  */
 function SidebarTooltip({
   label,
