@@ -6,6 +6,7 @@ import { cn } from "@/lib/utils"
 
 import { SidebarFrame } from "./mobile-drawer"
 import { SidebarTooltip } from "./sidebar-collapse"
+import { sidebarNavItemClass } from "./sidebar-styles"
 
 /**
  * 데스크톱에서는 그리드 칸, 좁은 화면에서는 드로어가 된다. 그 분기는
@@ -154,22 +155,7 @@ function SidebarNavItem({
     <Comp
       data-active={active || undefined}
       aria-current={active ? "page" : undefined}
-      className={cn(
-        "flex h-9 items-center gap-2.5 overflow-hidden rounded-md px-2.5 text-sm whitespace-nowrap text-sidebar-foreground/80 outline-none transition-colors",
-        "hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
-        "focus-visible:ring-3 focus-visible:ring-sidebar-ring/50",
-        // 활성 배경은 --sidebar-accent 를 전경색 쪽으로 섞어 만든다. 섞는 비율은
-        // --admin-shell-active-mix 로 조정한다(AdminShell 이 3% 로 선언).
-        // 폴백 3% 를 둔 이유는 이 파일만 복사해가도 동작해야 하기 때문이다 —
-        // 변수가 없으면 color-mix 전체가 무효가 되어 배경이 아예 사라진다.
-        // 새 색상 토큰을 만들지 않고 shadcn 기본 토큰만으로 계산하는 것도 같은 이유다.
-        "data-active:bg-[color-mix(in_oklch,var(--sidebar-accent),var(--sidebar-foreground)_var(--admin-shell-active-mix,3%))] data-active:font-medium data-active:text-sidebar-accent-foreground",
-        // 접힘: 아이콘만 남기고 가운데 정렬
-        "group-data-collapsed/shell:justify-center group-data-collapsed/shell:gap-0 group-data-collapsed/shell:px-0",
-        "group-data-collapsed/shell:[&>span]:hidden",
-        "[&>span]:truncate [&_svg]:size-4 [&_svg]:shrink-0",
-        className
-      )}
+      className={cn(sidebarNavItemClass, className)}
       {...props}
     >
       {icon}

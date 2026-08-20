@@ -5,6 +5,7 @@ export {
   type ShellContextValue,
 } from "./shell-context"
 export { TopbarMenuButton } from "./mobile-drawer"
+export { SidebarNavSubmenu } from "./sidebar-submenu"
 export { SidebarCollapseToggle } from "./sidebar-collapse"
 export {
   Sidebar,
