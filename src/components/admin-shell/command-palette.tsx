@@ -4,7 +4,7 @@ import * as React from "react"
 import { Search } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
-import { CommandDialog } from "@/components/ui/command"
+import { Command, CommandDialog } from "@/components/ui/command"
 import { cn } from "@/lib/utils"
 
 import { useShellState } from "./shell-context"
@@ -26,6 +26,10 @@ import { useShellState } from "./shell-context"
  *
  * 열림 상태는 셸이 들고 있어 CommandPaletteTrigger 와 배선 없이 이어진다.
  * open / onOpenChange 를 주면 제어 모드로 바뀐다.
+ *
+ * children 을 <Command> 로 감싸는 것이 중요하다. shadcn 의 CommandDialog 는 children 을
+ * 그대로 DialogContent 에 넣기만 해서, CommandInput 이 cmdk 컨텍스트 없이 마운트되면
+ * "Cannot read properties of undefined (reading 'subscribe')" 로 앱이 죽는다.
  */
 function CommandPalette({
   open: openProp,
@@ -72,7 +76,7 @@ function CommandPalette({
       description={description}
       {...props}
     >
-      {children}
+      <Command>{children}</Command>
     </CommandDialog>
   )
 }
