@@ -5,7 +5,6 @@ import { Search } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { Command, CommandDialog } from "@/components/ui/command"
-import { cn } from "@/lib/utils"
 
 import { useShellState } from "./shell-context"
 
@@ -100,7 +99,7 @@ function CommandPaletteTrigger({
       variant="ghost"
       size="icon-sm"
       aria-label={label}
-      className={cn(className)}
+      className={className}
       onClick={(event) => {
         onClick?.(event)
         if (!event.defaultPrevented) setSearchOpen(true)

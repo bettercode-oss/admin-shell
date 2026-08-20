@@ -22,12 +22,123 @@ AdminShell은 Sidebar + Topbar + Content 3영역 그리드 레이아웃입니다
 ```
 
 Sidebar와 Topbar는 고정되고 ShellContent 영역만 스크롤됩니다.
-폭과 높이는 CSS 변수로 노출되어 있어 소비하는 쪽에서 덮어쓸 수 있습니다.
+치수와 색 혼합 비율은 CSS 변수로 노출되어 있어 소비하는 쪽에서 덮어쓸 수 있습니다.
 
 ```
---admin-shell-sidebar-width: 16rem
---admin-shell-topbar-height: 3.5rem
+--admin-shell-sidebar-width: 16rem             펼친 사이드바 폭
+--admin-shell-sidebar-width-collapsed: 4rem    접힌 사이드바 폭
+--admin-shell-topbar-height: 3.5rem            토프바 높이
+--admin-shell-active-mix: 3%                   활성 메뉴 배경을 전경색 쪽으로 섞는 비율
 ```
+
+```tsx
+<AdminShell style={{ "--admin-shell-sidebar-width": "18rem" }}>
+```
+
+접기가 이 변수들을 어떻게 쓰는지는 [ARCHITECTURE.md](ARCHITECTURE.md) 를 보세요.
+
+## 컴포넌트
+
+**레이아웃**
+
+| | |
+|---|---|
+| `AdminShell` | 셸 컨테이너. 상태와 `TooltipProvider` 를 품는다 |
+| `ShellContent` | 본문. 사이드바·토프바는 고정되고 여기만 스크롤된다 |
+
+**사이드바**
+
+| | |
+|---|---|
+| `Sidebar` | 데스크톱에서는 그리드 칸, 좁은 화면에서는 드로어 |
+| `SidebarHeader` | 헤더. `SidebarHeaderTitle`(접히면 숨음) 과 `SidebarHeaderActions` 를 담는다 |
+| `SidebarCollapseToggle` | 접기/펼치기 버튼 |
+| `SidebarNav` | 네비게이션 |
+| `SidebarGroup` | 구분 라벨로 묶기. 접히면 라벨 대신 구분선 |
+| `SidebarNavItem` | 메뉴 항목. `icon` / `active` / `tooltip` / `asChild` |
+| `SidebarNavSubmenu` | 2단계 메뉴. 펼침=아코디언, 접힘=팝오버 |
+| `SidebarFooter` | 하단 슬롯 |
+
+**토프바**
+
+| | |
+|---|---|
+| `Topbar` / `TopbarTitle` / `TopbarActions` | 토프바와 슬롯 |
+| `TopbarMenuButton` | 모바일 드로어를 여는 햄버거. 데스크톱에서는 숨는다 |
+
+**커맨드 팔레트**
+
+| | |
+|---|---|
+| `CommandPalette` | ⌘K 로 열리는 팔레트. 내용은 children 으로 조립한다 |
+| `CommandPaletteTrigger` | 팔레트를 여는 아이콘 버튼 |
+| `CommandInput` `CommandList` `CommandEmpty` `CommandGroup` `CommandItem` `CommandSeparator` `CommandShortcut` | 팔레트 내용 조립용 (shadcn 것을 그대로 재수출) |
+
+**훅**
+
+| | |
+|---|---|
+| `useShellState()` | 접힘 · 모바일 드로어 · 팔레트 열림 상태 |
+| `useIsMobile()` | 브레이크포인트(`max-width: 767px`) 판별 |
+
+## 조립 예제
+
+```tsx
+<AdminShell>
+  <Sidebar>
+    <SidebarHeader>
+      <SidebarHeaderTitle>제품명</SidebarHeaderTitle>
+      <SidebarHeaderActions>
+        <CommandPaletteTrigger />
+        <SidebarCollapseToggle />
+      </SidebarHeaderActions>
+    </SidebarHeader>
+
+    <SidebarNav aria-label="주요 메뉴">
+      <SidebarGroup label="운영">
+        <SidebarNavItem icon={<Home />} tooltip="대시보드" active asChild>
+          <Link href="/"><span>대시보드</span></Link>
+        </SidebarNavItem>
+
+        <SidebarNavSubmenu icon={<Users />} label="사용자" defaultOpen>
+          <SidebarNavItem asChild>
+            <Link href="/users"><span>목록</span></Link>
+          </SidebarNavItem>
+        </SidebarNavSubmenu>
+      </SidebarGroup>
+    </SidebarNav>
+
+    <SidebarFooter>v0.1.0</SidebarFooter>
+  </Sidebar>
+
+  <Topbar>
+    <TopbarMenuButton />
+    <TopbarTitle>대시보드</TopbarTitle>
+    <TopbarActions>{/* ... */}</TopbarActions>
+  </Topbar>
+
+  <ShellContent>{children}</ShellContent>
+
+  <CommandPalette>
+    <CommandInput placeholder="검색..." />
+    <CommandList>
+      <CommandEmpty>결과가 없습니다.</CommandEmpty>
+      <CommandGroup heading="메뉴">
+        <CommandItem onSelect={() => router.push("/users")}>사용자</CommandItem>
+      </CommandGroup>
+    </CommandList>
+  </CommandPalette>
+</AdminShell>
+```
+
+세 가지가 이 라이브러리의 전제입니다.
+
+- **라우터를 모릅니다.** `SidebarNavItem` 은 `href` 를 알지 못합니다. `asChild` 로 링크를
+  꽂아 넣고 활성 여부는 `active` 로 주입합니다
+- **검색 결과를 모릅니다.** 팔레트는 틀만 제공하고 무엇을 검색해 어떻게 그릴지는
+  전부 children 으로 조립합니다
+- **상태는 안 줘도 됩니다.** 접힘·드로어·팔레트 모두 비제어가 기본이고,
+  `collapsed` / `open` 같은 props 를 주면 제어 모드로 바뀝니다
 
 ## 복사해서 쓰기
 
