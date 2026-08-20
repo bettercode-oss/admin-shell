@@ -1,6 +1,7 @@
 import * as React from "react"
 import { Slot } from "radix-ui"
 
+import { Separator } from "@/components/ui/separator"
 import { cn } from "@/lib/utils"
 
 import { SidebarFrame } from "./mobile-drawer"
@@ -81,6 +82,48 @@ function SidebarNav({
 }
 
 /**
+ * 메뉴를 구분 라벨로 묶는다. SidebarNav 의 <ul> 안에 들어가므로 <li> 이고,
+ * 자식 항목은 중첩 <ul> 에 담긴다.
+ *
+ * 접히면 라벨은 사라지고 구분선만 남는다 — 4rem 폭에 라벨을 넣을 자리가 없다.
+ * 서버 컴포넌트라 useId 를 쓸 수 없어, label 이 문자열일 때만 aria-label 로 연결한다.
+ */
+function SidebarGroup({
+  className,
+  label,
+  children,
+  ...props
+}: React.ComponentProps<"li"> & { label?: React.ReactNode }) {
+  return (
+    <li
+      data-slot="sidebar-group"
+      className={cn("mt-3 first:mt-0", className)}
+      {...props}
+    >
+      {label ? (
+        <>
+          <div
+            data-slot="sidebar-group-label"
+            className="truncate px-2.5 pb-1 text-xs font-medium text-sidebar-foreground/50 group-data-collapsed/shell:hidden"
+          >
+            {label}
+          </div>
+          <Separator className="mt-1 mb-2 hidden bg-sidebar-border group-data-collapsed/shell:block" />
+        </>
+      ) : null}
+
+      <ul
+        role="group"
+        aria-label={typeof label === "string" ? label : undefined}
+        className="flex flex-col gap-0.5"
+      >
+        {children}
+      </ul>
+    </li>
+  )
+}
+
+/**
  * 라우터에 의존하지 않는다. asChild 로 소비자가 next/link 든 react-router 의 Link 든
  * 평범한 <a> 든 꽂아 넣고, 활성 여부는 active prop 으로만 주입한다.
  *
@@ -157,6 +200,7 @@ function SidebarFooter({ className, ...props }: React.ComponentProps<"div">) {
 
 export {
   Sidebar,
+  SidebarGroup,
   SidebarHeader,
   SidebarHeaderTitle,
   SidebarHeaderActions,

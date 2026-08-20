@@ -8,6 +8,7 @@ export { TopbarMenuButton } from "./mobile-drawer"
 export { SidebarCollapseToggle } from "./sidebar-collapse"
 export {
   Sidebar,
+  SidebarGroup,
   SidebarHeader,
   SidebarHeaderTitle,
   SidebarHeaderActions,
