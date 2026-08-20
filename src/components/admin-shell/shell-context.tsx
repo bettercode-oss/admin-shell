@@ -9,6 +9,9 @@ type ShellContextValue = {
   /** 모바일 드로어 열림 여부. 데스크톱에서는 쓰이지 않는다. */
   mobileOpen: boolean
   setMobileOpen: (open: boolean) => void
+  /** 커맨드 팔레트 열림 여부. 트리거와 팔레트를 배선 없이 잇기 위해 셸이 들고 있다. */
+  searchOpen: boolean
+  setSearchOpen: (open: boolean) => void
 }
 
 /** 이 폭 미만에서 사이드바가 그리드에서 빠지고 드로어로 바뀐다 (Tailwind md). */
@@ -42,6 +45,7 @@ function useShellState(): ShellContextValue {
   const context = React.useContext(ShellContext)
   const [collapsed, setCollapsed] = React.useState(false)
   const [mobileOpen, setMobileOpen] = React.useState(false)
+  const [searchOpen, setSearchOpen] = React.useState(false)
 
   const fallback = React.useMemo<ShellContextValue>(
     () => ({
@@ -50,8 +54,10 @@ function useShellState(): ShellContextValue {
       toggleCollapsed: () => setCollapsed((previous) => !previous),
       mobileOpen,
       setMobileOpen,
+      searchOpen,
+      setSearchOpen,
     }),
-    [collapsed, mobileOpen]
+    [collapsed, mobileOpen, searchOpen]
   )
 
   return context ?? fallback
@@ -74,6 +80,7 @@ function ShellRoot({
 }) {
   const [uncontrolled, setUncontrolled] = React.useState(defaultCollapsed)
   const [mobileOpen, setMobileOpen] = React.useState(false)
+  const [searchOpen, setSearchOpen] = React.useState(false)
   const collapsed = collapsedProp ?? uncontrolled
 
   const setCollapsed = React.useCallback(
@@ -91,8 +98,10 @@ function ShellRoot({
       toggleCollapsed: () => setCollapsed(!collapsed),
       mobileOpen,
       setMobileOpen,
+      searchOpen,
+      setSearchOpen,
     }),
-    [collapsed, setCollapsed, mobileOpen]
+    [collapsed, setCollapsed, mobileOpen, searchOpen]
   )
 
   return (
