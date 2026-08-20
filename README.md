@@ -1,6 +1,9 @@
 # admin-shell
 특정 프로젝트 로직이 전혀 없는 순수 레이아웃/UI 셸
 
+- 다른 프로젝트에 **가져다 쓰려면** → [복사해서 쓰는 방법](#다른-프로젝트에-복사해서-쓰는-방법)
+- **이 저장소를 고치려면** → [개발하기](#이-저장소-자체를-개발하려면)
+
 ## Layout
 
 AdminShell은 Sidebar + Topbar + Content 3영역 그리드 레이아웃입니다.
@@ -36,6 +39,74 @@ Sidebar와 Topbar는 고정되고 ShellContent 영역만 스크롤됩니다.
 ```
 
 접기가 이 변수들을 어떻게 쓰는지는 [ARCHITECTURE.md](ARCHITECTURE.md) 를 보세요.
+
+## 다른 프로젝트에 복사해서 쓰는 방법
+
+npm 패키지가 아니라 **파일을 복사해 쓰는** 방식입니다(shadcn/ui 와 같은 방식).
+
+복사 단위는 `src/components/admin-shell/` **폴더 전체**입니다. 파일끼리 서로 참조하므로
+하나만 떼어가면 컴파일되지 않습니다.
+
+### 전제 조건
+
+- Tailwind v4
+- shadcn/ui 토큰 — `--sidebar`, `--sidebar-foreground`, `--sidebar-accent`,
+  `--sidebar-border`, `--sidebar-ring` 이 정의되어 있어야 합니다 (`npx shadcn@latest init` 이
+  기본으로 넣어줍니다). 없으면 사이드바 색이 죽습니다
+- `cn()` 유틸 (`src/lib/utils.ts`)
+
+### 필요한 shadcn 컴포넌트
+
+```
+npx shadcn@latest add button tooltip sheet separator collapsible popover command
+```
+
+`command` 는 `dialog` 와 `input-group` 을 함께 가져옵니다.
+
+아이콘 기본값으로 `lucide-react` 를 씁니다. 다른 아이콘 세트를 쓴다면 셸이 제공하는
+아이콘 버튼은 `children` 으로 덮어쓸 수 있습니다.
+
+```tsx
+<SidebarCollapseToggle><Bars3Icon className="size-4" /></SidebarCollapseToggle>
+```
+
+### 파일별 의존
+
+| 파일 | 같은 폴더 | shadcn ui | 기타 |
+|---|---|---|---|
+| `admin-shell.tsx` | `shell-context` | tooltip | `cn()` |
+| `sidebar.tsx` | `mobile-drawer`, `sidebar-collapse`, `sidebar-styles` | separator | `radix-ui`(Slot), `cn()` |
+| `sidebar-collapse.tsx` | `shell-context` | button, tooltip | lucide, `cn()` |
+| `sidebar-submenu.tsx` | `shell-context`, `sidebar-styles` | collapsible, popover | lucide, `cn()` |
+| `mobile-drawer.tsx` | `shell-context` | button, sheet | lucide, `cn()` |
+| `command-palette.tsx` | `shell-context` | button, command | lucide, `cn()` |
+| `topbar.tsx` | — | — | `cn()` |
+| `shell-context.tsx` | — | — | — |
+| `sidebar-styles.ts` | — | — | — |
+
+`shell-context.tsx` 와 `sidebar-styles.ts` 는 외부 의존이 없고, `topbar.tsx` 는 `cn()` 하나만
+필요하므로 이 셋은 단독으로 떼어가도 됩니다.
+
+### 사이드바만 쓰고 싶다면
+
+`sidebar.tsx` 는 아래를 함께 가져가야 합니다.
+
+```
+sidebar.tsx
+├── mobile-drawer.tsx      ← 데스크톱/드로어 분기
+├── sidebar-collapse.tsx   ← 접힘 툴팁
+├── sidebar-styles.ts      ← 메뉴 행 클래스
+└── shell-context.tsx      ← 위 둘이 상태를 읽는다
+
+shadcn ui: button, tooltip, sheet, separator
+```
+
+`sidebar-submenu.tsx`(2단계 메뉴)와 `command-palette.tsx`(커맨드 팔레트)는 `sidebar.tsx` 가
+참조하지 않으므로 필요 없으면 빼도 됩니다. 그 경우 `collapsible` / `popover` / `command` 도
+필요 없습니다.
+
+`useShellState()` 는 Provider 없이도 동작합니다. `AdminShell` 없이 `Sidebar` 만 가져가도
+컴포넌트가 스스로 상태를 들고 동작합니다.
 
 ## 컴포넌트
 
@@ -140,70 +211,34 @@ Sidebar와 Topbar는 고정되고 ShellContent 영역만 스크롤됩니다.
 - **상태는 안 줘도 됩니다.** 접힘·드로어·팔레트 모두 비제어가 기본이고,
   `collapsed` / `open` 같은 props 를 주면 제어 모드로 바뀝니다
 
-## 복사해서 쓰기
+## 이 저장소 자체를 개발하려면
 
-npm 패키지가 아니라 **파일을 복사해 쓰는** 방식입니다(shadcn/ui 와 같은 방식).
+위 내용은 셸을 **가져다 쓰는** 사람을 위한 것이고, 아래는 이 저장소를 **고치는** 사람을 위한 것입니다.
 
-복사 단위는 `src/components/admin-shell/` **폴더 전체**입니다. 파일끼리 서로 참조하므로
-하나만 떼어가면 컴파일되지 않습니다.
-
-### 전제 조건
-
-- Tailwind v4
-- shadcn/ui 토큰 — `--sidebar`, `--sidebar-foreground`, `--sidebar-accent`,
-  `--sidebar-border`, `--sidebar-ring` 이 정의되어 있어야 합니다 (`npx shadcn@latest init` 이
-  기본으로 넣어줍니다). 없으면 사이드바 색이 죽습니다
-- `cn()` 유틸 (`src/lib/utils.ts`)
-
-### 필요한 shadcn 컴포넌트
-
-```
-npx shadcn@latest add button tooltip sheet separator collapsible popover command
+```bash
+git clone https://github.com/bettercode-oss/admin-shell.git
+cd admin-shell
+npm install
+npm run dev
 ```
 
-`command` 는 `dialog` 와 `input-group` 을 함께 가져옵니다.
+`http://localhost:3000` 에서 데모가 뜹니다. 3000 번이 이미 쓰이고 있으면 Next 가 다음 포트로
+옮기므로, 터미널에 찍히는 주소를 확인하세요. 포트를 고정하려면 `npm run dev -- --port 3100`.
 
-아이콘 기본값으로 `lucide-react` 를 씁니다. 다른 아이콘 세트를 쓴다면 셸이 제공하는
-아이콘 버튼은 `children` 으로 덮어쓸 수 있습니다.
+| 명령 | |
+|---|---|
+| `npm run dev` | 개발 서버 |
+| `npm run build` | 프로덕션 빌드 (타입 검사 포함) |
+| `npm run lint` | ESLint |
+| `npx tsc --noEmit` | 타입만 검사 |
 
-```tsx
-<SidebarCollapseToggle><Bars3Icon className="size-4" /></SidebarCollapseToggle>
-```
+Node 22 / npm 10 에서 개발했습니다.
 
-### 파일별 의존
+### 알아둘 것
 
-| 파일 | 같은 폴더 | shadcn ui | 기타 |
-|---|---|---|---|
-| `admin-shell.tsx` | `shell-context` | tooltip | `cn()` |
-| `sidebar.tsx` | `mobile-drawer`, `sidebar-collapse`, `sidebar-styles` | separator | `radix-ui`(Slot), `cn()` |
-| `sidebar-collapse.tsx` | `shell-context` | button, tooltip | lucide, `cn()` |
-| `sidebar-submenu.tsx` | `shell-context`, `sidebar-styles` | collapsible, popover | lucide, `cn()` |
-| `mobile-drawer.tsx` | `shell-context` | button, sheet | lucide, `cn()` |
-| `command-palette.tsx` | `shell-context` | button, command | lucide, `cn()` |
-| `topbar.tsx` | — | — | `cn()` |
-| `shell-context.tsx` | — | — | — |
-| `sidebar-styles.ts` | — | — | — |
-
-`shell-context.tsx` 와 `sidebar-styles.ts` 는 외부 의존이 없고, `topbar.tsx` 는 `cn()` 하나만
-필요하므로 이 셋은 단독으로 떼어가도 됩니다.
-
-### 사이드바만 쓰고 싶다면
-
-`sidebar.tsx` 는 아래를 함께 가져가야 합니다.
-
-```
-sidebar.tsx
-├── mobile-drawer.tsx      ← 데스크톱/드로어 분기
-├── sidebar-collapse.tsx   ← 접힘 툴팁
-├── sidebar-styles.ts      ← 메뉴 행 클래스
-└── shell-context.tsx      ← 위 둘이 상태를 읽는다
-
-shadcn ui: button, tooltip, sheet, separator
-```
-
-`sidebar-submenu.tsx`(2단계 메뉴)와 `command-palette.tsx`(커맨드 팔레트)는 `sidebar.tsx` 가
-참조하지 않으므로 필요 없으면 빼도 됩니다. 그 경우 `collapsible` / `popover` / `command` 도
-필요 없습니다.
-
-`useShellState()` 는 Provider 없이도 동작합니다. `AdminShell` 없이 `Sidebar` 만 가져가도
-컴포넌트가 스스로 상태를 들고 동작합니다.
+- **`src/app/page.tsx` 는 컴포넌트 프리뷰/데모 전용입니다.** 제품 로직이나 실제 데이터 호출을
+  넣지 않습니다. 셸에 넣을 자리가 애매한 것은 대개 데모에 둘 것도 아닙니다
+- 셸 레이아웃을 건드리는 작업이면 [ARCHITECTURE.md](ARCHITECTURE.md) 를 먼저 읽으세요 —
+  그리드 구조, CSS 변수, 서버/클라이언트 경계가 왜 그렇게 나뉘어 있는지 적혀 있습니다
+- 구조나 동작이 바뀌면 ARCHITECTURE.md 를, 공개 API 가 바뀌면 이 README 를 같은 PR 에서
+  갱신합니다. 자세한 원칙은 [CLAUDE.md](CLAUDE.md) 참조
