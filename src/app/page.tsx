@@ -13,12 +13,14 @@ import {
   ShellContent,
   Sidebar,
   SidebarCollapseToggle,
+  SidebarGroup,
   SidebarFooter,
   SidebarHeader,
   SidebarHeaderActions,
   SidebarHeaderTitle,
   SidebarNav,
   SidebarNavItem,
+  SidebarNavSubmenu,
   Topbar,
   TopbarActions,
   TopbarMenuButton,
@@ -32,13 +34,6 @@ import { ThemeToggle } from "./theme-toggle"
  * 컴포넌트 프리뷰/데모. 실제 제품 데이터가 아니라 하드코딩한 더미다.
  * 활성 항목은 라우터가 아니라 active prop 으로 주입한다는 점을 보여준다.
  */
-const nav = [
-  { label: "대시보드", href: "/", icon: LayoutDashboard, active: true },
-  { label: "사용자", href: "/users", icon: Users },
-  { label: "콘텐츠", href: "/contents", icon: FileText },
-  { label: "통계", href: "/stats", icon: BarChart3 },
-  { label: "설정", href: "/settings", icon: Settings },
-]
 
 export default function Page() {
   return (
@@ -52,19 +47,52 @@ export default function Page() {
         </SidebarHeader>
 
         <SidebarNav aria-label="주요 메뉴">
-          {nav.map(({ label, href, icon: Icon, active }) => (
+          <SidebarGroup>
             <SidebarNavItem
-              key={href}
-              icon={<Icon />}
-              tooltip={label}
-              active={active}
+              icon={<LayoutDashboard />}
+              tooltip="대시보드"
+              active
               asChild
             >
-              <Link href={href}>
-                <span>{label}</span>
+              <Link href="/">
+                <span>대시보드</span>
               </Link>
             </SidebarNavItem>
-          ))}
+          </SidebarGroup>
+
+          <SidebarGroup label="운영">
+            <SidebarNavSubmenu icon={<Users />} label="사용자" defaultOpen>
+              <SidebarNavItem asChild>
+                <Link href="/users">
+                  <span>목록</span>
+                </Link>
+              </SidebarNavItem>
+              <SidebarNavItem asChild>
+                <Link href="/users/new">
+                  <span>추가</span>
+                </Link>
+              </SidebarNavItem>
+            </SidebarNavSubmenu>
+
+            <SidebarNavItem icon={<FileText />} tooltip="콘텐츠" asChild>
+              <Link href="/contents">
+                <span>콘텐츠</span>
+              </Link>
+            </SidebarNavItem>
+            <SidebarNavItem icon={<BarChart3 />} tooltip="통계" asChild>
+              <Link href="/stats">
+                <span>통계</span>
+              </Link>
+            </SidebarNavItem>
+          </SidebarGroup>
+
+          <SidebarGroup label="설정">
+            <SidebarNavItem icon={<Settings />} tooltip="설정" asChild>
+              <Link href="/settings">
+                <span>설정</span>
+              </Link>
+            </SidebarNavItem>
+          </SidebarGroup>
         </SidebarNav>
 
         <SidebarFooter>
