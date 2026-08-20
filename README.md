@@ -22,12 +22,20 @@ AdminShell은 Sidebar + Topbar + Content 3영역 그리드 레이아웃입니다
 ```
 
 Sidebar와 Topbar는 고정되고 ShellContent 영역만 스크롤됩니다.
-폭과 높이는 CSS 변수로 노출되어 있어 소비하는 쪽에서 덮어쓸 수 있습니다.
+치수와 색 혼합 비율은 CSS 변수로 노출되어 있어 소비하는 쪽에서 덮어쓸 수 있습니다.
 
 ```
---admin-shell-sidebar-width: 16rem
---admin-shell-topbar-height: 3.5rem
+--admin-shell-sidebar-width: 16rem             펼친 사이드바 폭
+--admin-shell-sidebar-width-collapsed: 4rem    접힌 사이드바 폭
+--admin-shell-topbar-height: 3.5rem            토프바 높이
+--admin-shell-active-mix: 3%                   활성 메뉴 배경을 전경색 쪽으로 섞는 비율
 ```
+
+```tsx
+<AdminShell style={{ "--admin-shell-sidebar-width": "18rem" }}>
+```
+
+접기가 이 변수들을 어떻게 쓰는지는 [ARCHITECTURE.md](ARCHITECTURE.md) 를 보세요.
 
 ## 복사해서 쓰기
 
