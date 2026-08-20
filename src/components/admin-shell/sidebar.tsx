@@ -3,24 +3,15 @@ import { Slot } from "radix-ui"
 
 import { cn } from "@/lib/utils"
 
+import { SidebarFrame } from "./mobile-drawer"
 import { SidebarTooltip } from "./sidebar-collapse"
 
-function Sidebar({
-  className,
-  id = "admin-shell-sidebar",
-  ...props
-}: React.ComponentProps<"aside">) {
-  return (
-    <aside
-      id={id}
-      data-slot="sidebar"
-      className={cn(
-        "[grid-area:sidebar] flex min-h-0 flex-col overflow-hidden border-r border-sidebar-border bg-sidebar text-sidebar-foreground",
-        className
-      )}
-      {...props}
-    />
-  )
+/**
+ * 데스크톱에서는 그리드 칸, 좁은 화면에서는 드로어가 된다. 그 분기는
+ * SidebarFrame(클라이언트)이 맡고 이 파일은 서버 컴포넌트로 남는다.
+ */
+function Sidebar(props: React.ComponentProps<typeof SidebarFrame>) {
+  return <SidebarFrame {...props} />
 }
 
 function SidebarHeader({ className, ...props }: React.ComponentProps<"div">) {

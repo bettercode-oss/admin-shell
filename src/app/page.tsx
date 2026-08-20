@@ -21,6 +21,8 @@ import {
   SidebarNavItem,
   Topbar,
   TopbarActions,
+  TopbarMenuButton,
+  TopbarTitle,
 } from "@/components/admin-shell"
 import { Button } from "@/components/ui/button"
 
@@ -72,7 +74,9 @@ export default function Page() {
         </SidebarFooter>
       </Sidebar>
 
-      <Topbar title="대시보드">
+      <Topbar>
+        <TopbarMenuButton />
+        <TopbarTitle>대시보드</TopbarTitle>
         <TopbarActions>
           <ThemeToggle />
           <Button variant="ghost" size="icon" aria-label="알림">

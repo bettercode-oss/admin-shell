@@ -6,6 +6,29 @@ type ShellContextValue = {
   collapsed: boolean
   setCollapsed: (collapsed: boolean) => void
   toggleCollapsed: () => void
+  /** 모바일 드로어 열림 여부. 데스크톱에서는 쓰이지 않는다. */
+  mobileOpen: boolean
+  setMobileOpen: (open: boolean) => void
+}
+
+/** 이 폭 미만에서 사이드바가 그리드에서 빠지고 드로어로 바뀐다 (Tailwind md). */
+const MOBILE_QUERY = "(max-width: 767px)"
+
+/**
+ * 서버 스냅샷은 항상 false(데스크톱)라 하이드레이션 불일치가 없다.
+ * useState + useEffect 대신 useSyncExternalStore 를 쓰는 이유는 그것이
+ * react-hooks/set-state-in-effect 규칙에 걸리기 때문이기도 하다.
+ */
+function useIsMobile() {
+  return React.useSyncExternalStore(
+    (onChange) => {
+      const query = window.matchMedia(MOBILE_QUERY)
+      query.addEventListener("change", onChange)
+      return () => query.removeEventListener("change", onChange)
+    },
+    () => window.matchMedia(MOBILE_QUERY).matches,
+    () => false
+  )
 }
 
 const ShellContext = React.createContext<ShellContextValue | null>(null)
@@ -18,14 +41,17 @@ const ShellContext = React.createContext<ShellContextValue | null>(null)
 function useShellState(): ShellContextValue {
   const context = React.useContext(ShellContext)
   const [collapsed, setCollapsed] = React.useState(false)
+  const [mobileOpen, setMobileOpen] = React.useState(false)
 
   const fallback = React.useMemo<ShellContextValue>(
     () => ({
       collapsed,
       setCollapsed,
       toggleCollapsed: () => setCollapsed((previous) => !previous),
+      mobileOpen,
+      setMobileOpen,
     }),
-    [collapsed]
+    [collapsed, mobileOpen]
   )
 
   return context ?? fallback
@@ -47,6 +73,7 @@ function ShellRoot({
   onCollapsedChange?: (collapsed: boolean) => void
 }) {
   const [uncontrolled, setUncontrolled] = React.useState(defaultCollapsed)
+  const [mobileOpen, setMobileOpen] = React.useState(false)
   const collapsed = collapsedProp ?? uncontrolled
 
   const setCollapsed = React.useCallback(
@@ -62,8 +89,10 @@ function ShellRoot({
       collapsed,
       setCollapsed,
       toggleCollapsed: () => setCollapsed(!collapsed),
+      mobileOpen,
+      setMobileOpen,
     }),
-    [collapsed, setCollapsed]
+    [collapsed, setCollapsed, mobileOpen]
   )
 
   return (
@@ -77,4 +106,4 @@ function ShellRoot({
   )
 }
 
-export { ShellRoot, useShellState, type ShellContextValue }
+export { ShellRoot, useShellState, useIsMobile, type ShellContextValue }

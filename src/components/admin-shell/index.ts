@@ -1,5 +1,10 @@
 export { AdminShell, ShellContent } from "./admin-shell"
-export { useShellState, type ShellContextValue } from "./shell-context"
+export {
+  useShellState,
+  useIsMobile,
+  type ShellContextValue,
+} from "./shell-context"
+export { TopbarMenuButton } from "./mobile-drawer"
 export { SidebarCollapseToggle } from "./sidebar-collapse"
 export {
   Sidebar,
