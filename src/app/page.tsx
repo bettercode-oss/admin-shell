@@ -10,6 +10,15 @@ import {
 
 import {
   AdminShell,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+  CommandPalette,
+  CommandPaletteTrigger,
+  CommandSeparator,
+  CommandShortcut,
   ShellContent,
   Sidebar,
   SidebarCollapseToggle,
@@ -42,6 +51,7 @@ export default function Page() {
         <SidebarHeader>
           <SidebarHeaderTitle>admin-shell</SidebarHeaderTitle>
           <SidebarHeaderActions>
+            <CommandPaletteTrigger />
             <SidebarCollapseToggle />
           </SidebarHeaderActions>
         </SidebarHeader>
@@ -131,6 +141,27 @@ export default function Page() {
           ))}
         </div>
       </ShellContent>
+
+      <CommandPalette>
+        <CommandInput placeholder="메뉴 검색..." />
+        <CommandList>
+          <CommandEmpty>결과가 없습니다.</CommandEmpty>
+          <CommandGroup heading="메뉴">
+            <CommandItem>대시보드</CommandItem>
+            <CommandItem>사용자</CommandItem>
+            <CommandItem>콘텐츠</CommandItem>
+            <CommandItem>통계</CommandItem>
+            <CommandItem>설정</CommandItem>
+          </CommandGroup>
+          <CommandSeparator />
+          <CommandGroup heading="작업">
+            <CommandItem>
+              새 사용자 추가
+              <CommandShortcut>⌘N</CommandShortcut>
+            </CommandItem>
+          </CommandGroup>
+        </CommandList>
+      </CommandPalette>
     </AdminShell>
   )
 }

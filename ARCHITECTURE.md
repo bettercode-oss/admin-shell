@@ -58,7 +58,8 @@ AdminShell                         TooltipProvider + ShellRoot(상태) + 그리�
 │   │       └── SidebarNavSubmenu  2단계 메뉴 (SidebarNavItem 들을 감싼다)
 │   └── SidebarFooter
 ├── Topbar (TopbarMenuButton / TopbarTitle / TopbarActions)
-└── ShellContent (children, min-h-0 overflow-y-auto)
+├── ShellContent (children, min-h-0 overflow-y-auto)
+└── CommandPalette              내용은 소비자가 children 으로 조립
 ```
 
 `Sidebar` 는 껍데기를 `SidebarFrame` 에 위임한다. 데스크톱에서는 그리드 칸을 차지하는
@@ -72,6 +73,7 @@ AdminShell                         TooltipProvider + ShellRoot(상태) + 그리�
                 sidebar-collapse.tsx   SidebarCollapseToggle, SidebarTooltip
                 mobile-drawer.tsx      SidebarFrame, TopbarMenuButton
                 sidebar-submenu.tsx    SidebarNavSubmenu
+                command-palette.tsx    CommandPalette, CommandPaletteTrigger
 공용            : sidebar-styles.ts     메뉴 행 클래스 (leaf 와 트리거가 공유)
 ```
 
@@ -84,6 +86,7 @@ group 변형도 CSS 변수도 닿지 않으므로 JS 로 상태를 알아야 한
 - 툴팁 → `sidebar-collapse.tsx`
 - 모바일 드로어 → `mobile-drawer.tsx`
 - 접힘 상태의 중첩 메뉴 팝오버 → `sidebar-submenu.tsx`
+- 커맨드 팔레트 → `command-palette.tsx`
 
 포털 밖에 놓이는 덕을 보기도 한다. 팝오버 안의 `SidebarNavItem` 은
 `group-data-collapsed/shell` 이 닿지 않아 라벨이 그대로 보인다 — 접힘용 분기를
@@ -111,6 +114,40 @@ hover 로 열렸을 때는 `onOpenAutoFocus` 를 막아 포커스를 빼앗지 �
 
 모바일 드로어 안에서는 접힘이 적용되지 않으므로(`collapsed && !isMobile`) 항상
 아코디언이다.
+
+## 커맨드 팔레트
+
+`CommandPalette` 는 **틀만** 제공한다. 무엇을 검색하고 결과를 어떻게 그릴지는 전부
+소비자가 children 으로 조립한다.
+
+```tsx
+<CommandPalette>
+  <CommandInput placeholder="검색..." />
+  <CommandList>
+    <CommandEmpty>결과가 없습니다.</CommandEmpty>
+    <CommandGroup heading="메뉴">
+      <CommandItem onSelect={() => router.push("/users")}>사용자</CommandItem>
+    </CommandGroup>
+  </CommandList>
+</CommandPalette>
+```
+
+결과를 `onSearch` 같은 콜백으로 받지 않는 이유는, 그렇게 하면 결과의 데이터 모양이
+라이브러리 계약이 되어 "제품 데이터 타입을 두지 않는다" 는 원칙이 깨지기 때문이다.
+
+- 열림 상태는 셸이 들고 있다(`searchOpen`). 그래서 `CommandPaletteTrigger` 와
+  배선 없이 이어진다. `open` / `onOpenChange` 를 주면 제어 모드
+- `shortcut={false}` 로 ⌘K / Ctrl+K 를 끌 수 있다
+- 필터링은 cmdk 기본 동작이다(렌더된 항목의 텍스트 기준). 비동기 검색을 직접 하려면
+  `shouldFilter={false}` 를 넘기면 된다
+- `CommandInput` / `CommandList` / `CommandEmpty` / `CommandGroup` / `CommandItem` /
+  `CommandSeparator` / `CommandShortcut` 은 shadcn 것을 `index.ts` 에서 그대로 다시
+  내보낸다. 소비자가 한곳에서 import 하도록 하기 위한 것이다
+
+**주의**: 이 버전의 shadcn `CommandDialog` 는 children 을 `DialogContent` 에 그대로
+넣기만 한다. `CommandPalette` 가 `<Command>` 로 감싸주지 않으면 `CommandInput` 이
+cmdk 컨텍스트 없이 마운트되어 팔레트를 여는 순간 앱이 죽는다
+(`Cannot read properties of undefined (reading 'subscribe')`).
 
 ## 반응형
 

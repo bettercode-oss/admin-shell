@@ -47,8 +47,10 @@ npm 패키지가 아니라 **파일을 복사해 쓰는** 방식입니다(shadcn
 ### 필요한 shadcn 컴포넌트
 
 ```
-npx shadcn@latest add button tooltip sheet separator collapsible popover
+npx shadcn@latest add button tooltip sheet separator collapsible popover command
 ```
+
+`command` 는 `dialog` 와 `input-group` 을 함께 가져옵니다.
 
 아이콘 기본값으로 `lucide-react` 를 씁니다. 다른 아이콘 세트를 쓴다면 셸이 제공하는
 아이콘 버튼은 `children` 으로 덮어쓸 수 있습니다.
@@ -66,6 +68,7 @@ npx shadcn@latest add button tooltip sheet separator collapsible popover
 | `sidebar-collapse.tsx` | `shell-context` | button, tooltip | lucide, `cn()` |
 | `sidebar-submenu.tsx` | `shell-context`, `sidebar-styles` | collapsible, popover | lucide, `cn()` |
 | `mobile-drawer.tsx` | `shell-context` | button, sheet | lucide, `cn()` |
+| `command-palette.tsx` | `shell-context` | button, command | lucide, `cn()` |
 | `topbar.tsx` | — | — | `cn()` |
 | `shell-context.tsx` | — | — | — |
 | `sidebar-styles.ts` | — | — | — |
@@ -87,8 +90,9 @@ sidebar.tsx
 shadcn ui: button, tooltip, sheet, separator
 ```
 
-`sidebar-submenu.tsx`(2단계 메뉴)는 `sidebar.tsx` 가 참조하지 않으므로, 중첩 메뉴가 필요
-없다면 빼도 됩니다. 그 경우 `collapsible` 과 `popover` 도 필요 없습니다.
+`sidebar-submenu.tsx`(2단계 메뉴)와 `command-palette.tsx`(커맨드 팔레트)는 `sidebar.tsx` 가
+참조하지 않으므로 필요 없으면 빼도 됩니다. 그 경우 `collapsible` / `popover` / `command` 도
+필요 없습니다.
 
 `useShellState()` 는 Provider 없이도 동작합니다. `AdminShell` 없이 `Sidebar` 만 가져가도
 컴포넌트가 스스로 상태를 들고 동작합니다.
