@@ -9,7 +9,11 @@
 
 ## 구조
 - src/components/admin-shell/ 에 컴포넌트
-- 각 컴포넌트는 독립적으로 import해서 다른 프로젝트에 복사해갈 수 있어야 함
+- 복사 단위는 이 폴더 전체다. 파일끼리 서로 참조하므로 하나만 떼어가면 컴파일되지 않는다
+  (Sidebar/Topbar를 서버 컴포넌트로 유지하려고 상태·포털이 필요한 조각을 클라이언트
+  파일로 나눈 결과다). 함께 필요한 shadcn 컴포넌트와 토큰은 README의 "복사해서 쓰기" 참조
+- 예외로 shell-context.tsx, sidebar-styles.ts, topbar.tsx는 외부 의존이 없거나 cn() 하나뿐이라
+  단독으로 떼어갈 수 있다
 
 ## 작업 시작 전
 - 셸 레이아웃을 건드리는 작업이면 ARCHITECTURE.md를 먼저 읽을 것
