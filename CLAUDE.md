@@ -9,11 +9,21 @@
 
 ## 구조
 - src/components/admin-shell/ 에 컴포넌트
-- 각 컴포넌트는 독립적으로 import해서 다른 프로젝트에 복사해갈 수 있어야 함
+- 복사 단위는 이 폴더 전체다. 파일끼리 서로 참조하므로 하나만 떼어가면 컴파일되지 않는다
+  (Sidebar/Topbar를 서버 컴포넌트로 유지하려고 상태·포털이 필요한 조각을 클라이언트
+  파일로 나눈 결과다). 함께 필요한 shadcn 컴포넌트와 토큰은 README의 "복사해서 쓰기" 참조
+- 예외로 shell-context.tsx, sidebar-styles.ts, topbar.tsx는 외부 의존이 없거나 cn() 하나뿐이라
+  단독으로 떼어갈 수 있다
 
 ## 작업 시작 전
 - 셸 레이아웃을 건드리는 작업이면 ARCHITECTURE.md를 먼저 읽을 것
 
 ## 문서 갱신 원칙
+두 문서는 독자가 다르므로 갱신 조건도 다르다. ARCHITECTURE.md는 셸을 고치는 사람,
+README는 셸을 쓰는 사람을 위한 것이다.
+
 - 컴포넌트 구조나 동작 방식이 바뀌면 ARCHITECTURE.md도 같은 PR 또는 후속 PR에서 갱신한다
+- 공개 API가 바뀌면 README도 같은 PR에서 갱신한다 — export하는 컴포넌트·훅의 추가/삭제,
+  props, CSS 변수, 복사할 때 필요한 파일이나 shadcn 컴포넌트가 여기 해당한다
+- 내부 구현만 바뀌고 공개 API가 그대로면 README는 건드리지 않는다
 - 갱신 시 문서의 서술과 실제 코드를 항목별로 대조해서 확인한다
