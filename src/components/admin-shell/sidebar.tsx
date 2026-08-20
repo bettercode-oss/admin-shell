@@ -1,10 +1,12 @@
 import * as React from "react"
 import { Slot } from "radix-ui"
 
+import { Separator } from "@/components/ui/separator"
 import { cn } from "@/lib/utils"
 
 import { SidebarFrame } from "./mobile-drawer"
 import { SidebarTooltip } from "./sidebar-collapse"
+import { sidebarNavItemClass } from "./sidebar-styles"
 
 /**
  * 데스크톱에서는 그리드 칸, 좁은 화면에서는 드로어가 된다. 그 분기는
@@ -81,6 +83,48 @@ function SidebarNav({
 }
 
 /**
+ * 메뉴를 구분 라벨로 묶는다. SidebarNav 의 <ul> 안에 들어가므로 <li> 이고,
+ * 자식 항목은 중첩 <ul> 에 담긴다.
+ *
+ * 접히면 라벨은 사라지고 구분선만 남는다 — 4rem 폭에 라벨을 넣을 자리가 없다.
+ * 서버 컴포넌트라 useId 를 쓸 수 없어, label 이 문자열일 때만 aria-label 로 연결한다.
+ */
+function SidebarGroup({
+  className,
+  label,
+  children,
+  ...props
+}: React.ComponentProps<"li"> & { label?: React.ReactNode }) {
+  return (
+    <li
+      data-slot="sidebar-group"
+      className={cn("mt-3 first:mt-0", className)}
+      {...props}
+    >
+      {label ? (
+        <>
+          <div
+            data-slot="sidebar-group-label"
+            className="truncate px-2.5 pb-1 text-xs font-medium text-sidebar-foreground/50 group-data-collapsed/shell:hidden"
+          >
+            {label}
+          </div>
+          <Separator className="mt-1 mb-2 hidden bg-sidebar-border group-data-collapsed/shell:block" />
+        </>
+      ) : null}
+
+      <ul
+        role="group"
+        aria-label={typeof label === "string" ? label : undefined}
+        className="flex flex-col gap-0.5"
+      >
+        {children}
+      </ul>
+    </li>
+  )
+}
+
+/**
  * 라우터에 의존하지 않는다. asChild 로 소비자가 next/link 든 react-router 의 Link 든
  * 평범한 <a> 든 꽂아 넣고, 활성 여부는 active prop 으로만 주입한다.
  *
@@ -111,22 +155,7 @@ function SidebarNavItem({
     <Comp
       data-active={active || undefined}
       aria-current={active ? "page" : undefined}
-      className={cn(
-        "flex h-9 items-center gap-2.5 overflow-hidden rounded-md px-2.5 text-sm whitespace-nowrap text-sidebar-foreground/80 outline-none transition-colors",
-        "hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
-        "focus-visible:ring-3 focus-visible:ring-sidebar-ring/50",
-        // 활성 배경은 --sidebar-accent 를 전경색 쪽으로 섞어 만든다. 섞는 비율은
-        // --admin-shell-active-mix 로 조정한다(AdminShell 이 3% 로 선언).
-        // 폴백 3% 를 둔 이유는 이 파일만 복사해가도 동작해야 하기 때문이다 —
-        // 변수가 없으면 color-mix 전체가 무효가 되어 배경이 아예 사라진다.
-        // 새 색상 토큰을 만들지 않고 shadcn 기본 토큰만으로 계산하는 것도 같은 이유다.
-        "data-active:bg-[color-mix(in_oklch,var(--sidebar-accent),var(--sidebar-foreground)_var(--admin-shell-active-mix,3%))] data-active:font-medium data-active:text-sidebar-accent-foreground",
-        // 접힘: 아이콘만 남기고 가운데 정렬
-        "group-data-collapsed/shell:justify-center group-data-collapsed/shell:gap-0 group-data-collapsed/shell:px-0",
-        "group-data-collapsed/shell:[&>span]:hidden",
-        "[&>span]:truncate [&_svg]:size-4 [&_svg]:shrink-0",
-        className
-      )}
+      className={cn(sidebarNavItemClass, className)}
       {...props}
     >
       {icon}
@@ -157,6 +186,7 @@ function SidebarFooter({ className, ...props }: React.ComponentProps<"div">) {
 
 export {
   Sidebar,
+  SidebarGroup,
   SidebarHeader,
   SidebarHeaderTitle,
   SidebarHeaderActions,

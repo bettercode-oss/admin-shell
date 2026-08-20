@@ -53,7 +53,9 @@ AdminShell                         TooltipProvider + ShellRoot(상태) + 그리�
 │   │   └── SidebarHeaderActions
 │   │       └── SidebarCollapseToggle
 │   ├── SidebarNav
-│   │   └── SidebarNavItem         icon / active / tooltip / asChild
+│   │   └── SidebarGroup           label(선택) + 중첩 <ul>
+│   │       ├── SidebarNavItem     icon / active / tooltip / asChild
+│   │       └── SidebarNavSubmenu  2단계 메뉴 (SidebarNavItem 들을 감싼다)
 │   └── SidebarFooter
 ├── Topbar (TopbarMenuButton / TopbarTitle / TopbarActions)
 └── ShellContent (children, min-h-0 overflow-y-auto)
@@ -69,6 +71,8 @@ AdminShell                         TooltipProvider + ShellRoot(상태) + 그리�
 클라이언트    : shell-context.tsx      ShellRoot(상태), useShellState(), useIsMobile()
                 sidebar-collapse.tsx   SidebarCollapseToggle, SidebarTooltip
                 mobile-drawer.tsx      SidebarFrame, TopbarMenuButton
+                sidebar-submenu.tsx    SidebarNavSubmenu
+공용            : sidebar-styles.ts     메뉴 행 클래스 (leaf 와 트리거가 공유)
 ```
 
 접힘 상태는 셸 루트의 `data-collapsed` 를 `group-data-collapsed/shell:` 변형으로 읽어
@@ -79,6 +83,34 @@ group 변형도 CSS 변수도 닿지 않으므로 JS 로 상태를 알아야 한
 
 - 툴팁 → `sidebar-collapse.tsx`
 - 모바일 드로어 → `mobile-drawer.tsx`
+- 접힘 상태의 중첩 메뉴 팝오버 → `sidebar-submenu.tsx`
+
+포털 밖에 놓이는 덕을 보기도 한다. 팝오버 안의 `SidebarNavItem` 은
+`group-data-collapsed/shell` 이 닿지 않아 라벨이 그대로 보인다 — 접힘용 분기를
+따로 쓰지 않아도 된다.
+
+## 중첩 메뉴
+
+`SidebarNavSubmenu` 는 사이드바 상태에 따라 두 가지로 렌더된다.
+
+| 사이드바 | 렌더 | 여는 방법 |
+|---|---|---|
+| 펼침 | Collapsible 아코디언 | 트리거 클릭 |
+| 접힘(4rem) | Popover | 포인터 hover, 키보드 Enter/Space |
+
+접힘 상태에서 아코디언을 쓸 수 없는 이유는 4rem 폭에 하위 항목을 펼칠 자리가 없어서다.
+
+**HoverCard 가 아니라 Popover 인 이유**: HoverCard 는 설계상 키보드로 내용에 들어갈 수
+없다. Tab 으로 트리거에 닿으면 열리기는 하지만 다음 Tab 이 팝오버를 건너뛰고 사이드바의
+다음 메뉴로 간다. Popover 는 열릴 때 포커스를 내용으로 옮기고 Escape 로 트리거에
+돌려준다. 포인터용 hover 는 `onPointerEnter`/`onPointerLeave` 로 직접 붙이고,
+hover 로 열렸을 때는 `onOpenAutoFocus` 를 막아 포커스를 빼앗지 않는다.
+
+닫기는 150ms 늦춘다. 트리거에서 팝오버로 커서를 옮기는 사이(`sideOffset` 만큼의 틈)에
+닫히지 않게 하기 위해서다.
+
+모바일 드로어 안에서는 접힘이 적용되지 않으므로(`collapsed && !isMobile`) 항상
+아코디언이다.
 
 ## 반응형
 
