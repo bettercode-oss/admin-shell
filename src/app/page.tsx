@@ -33,6 +33,8 @@ import {
   Topbar,
   TopbarActions,
   TopbarMenuButton,
+  TopbarNav,
+  TopbarNavItem,
   TopbarTitle,
 } from "@/components/admin-shell"
 import { Button } from "@/components/ui/button"
@@ -61,7 +63,6 @@ export default function Page() {
             <SidebarNavItem
               icon={<LayoutDashboard />}
               tooltip="대시보드"
-              active
               asChild
             >
               <Link href="/">
@@ -71,8 +72,8 @@ export default function Page() {
           </SidebarGroup>
 
           <SidebarGroup label="운영">
-            <SidebarNavSubmenu icon={<Users />} label="사용자" defaultOpen>
-              <SidebarNavItem asChild>
+            <SidebarNavSubmenu icon={<Users />} label="사용자" active defaultOpen>
+              <SidebarNavItem active asChild>
                 <Link href="/users">
                   <span>목록</span>
                 </Link>
@@ -80,6 +81,11 @@ export default function Page() {
               <SidebarNavItem asChild>
                 <Link href="/users/new">
                   <span>추가</span>
+                </Link>
+              </SidebarNavItem>
+              <SidebarNavItem asChild>
+                <Link href="/users/roles">
+                  <span>권한</span>
                 </Link>
               </SidebarNavItem>
             </SidebarNavSubmenu>
@@ -114,7 +120,22 @@ export default function Page() {
 
       <Topbar>
         <TopbarMenuButton />
-        <TopbarTitle>대시보드</TopbarTitle>
+        <TopbarTitle>사용자</TopbarTitle>
+
+        {/* 사이드바에서 펼쳐진 "사용자" 가지를 그대로 옆으로 편 것. 같은 링크가
+            사이드바에도 트리로 남아 있고, 접었을 때는 이쪽이 대신 보여준다. */}
+        <TopbarNav aria-label="사용자">
+          <TopbarNavItem active asChild>
+            <Link href="/users">목록</Link>
+          </TopbarNavItem>
+          <TopbarNavItem asChild>
+            <Link href="/users/new">추가</Link>
+          </TopbarNavItem>
+          <TopbarNavItem asChild>
+            <Link href="/users/roles">권한</Link>
+          </TopbarNavItem>
+        </TopbarNav>
+
         <TopbarActions>
           <ThemeToggle />
           <Button variant="ghost" size="icon" aria-label="알림">
