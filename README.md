@@ -73,6 +73,10 @@ date     2026-08-23
 폴더 위치가 다르면 두 번째 인자로 줍니다 — `sync-into.sh ../admin app/components/admin-shell`.
 손으로 복사해도 되지만 그 경우 `VERSION` 이 없어 갱신할 때 확인 단계를 쓸 수 없습니다.
 
+**`main` 이나 태그에서만 복사합니다.** 기능 브랜치에서 실행하면 막힙니다 — 이 저장소는
+squash-merge 라 브랜치 커밋이 머지된 뒤 `main` 이력에 남지 않고, 그 SHA 를 `VERSION` 에
+적으면 다음 갱신 때 기준점을 잃습니다.
+
 ### 전제 조건
 
 - Tailwind v4

@@ -61,6 +61,27 @@ fi
 HEAD_SHA=$(git -C "$REPO" rev-parse --short HEAD)
 REF=$(git -C "$REPO" describe --tags --exact-match HEAD 2>/dev/null \
       || git -C "$REPO" rev-parse --abbrev-ref HEAD)
+
+# VERSION 에 적는 커밋은 **나중에도 존재해야** 한다. 다음 갱신 때 그 커밋의 트리와
+# 비교해 로컬 수정분을 가려내기 때문이다.
+#
+# 이 저장소는 squash-merge 를 쓴다. 그래서 기능 브랜치의 tip 은 머지된 뒤 main 이력에
+# 남지 않는다. 그런 SHA 를 적으면 다음 갱신 때
+#   - 신선한 클론에서는 커밋 자체를 못 찾고
+#   - 로컬에 남아 있어도 이미 가진 변경이 "새로 들어온 것" 으로 다시 세어진다
+# 그래서 main 에 들어간 커밋이나 태그에서만 복사한다.
+BASE=${SYNC_BASE:-origin/main}
+if git -C "$REPO" describe --tags --exact-match HEAD >/dev/null 2>&1; then
+  :  # 태그는 영구적이다
+elif ! git -C "$REPO" rev-parse --verify --quiet "$BASE" >/dev/null 2>&1; then
+  echo "경고: $BASE 를 찾을 수 없어 출처 커밋이 오래 남는지 확인하지 못했다." >&2
+elif ! git -C "$REPO" merge-base --is-ancestor HEAD "$BASE" 2>/dev/null; then
+  echo "지금 HEAD($HEAD_SHA, $REF)는 $BASE 에 들어가 있지 않다."
+  echo "이 저장소는 squash-merge 라 브랜치 커밋은 머지 뒤 main 이력에서 사라진다."
+  echo "VERSION 에 적으면 다음 갱신 때 기준점을 잃는다 — 머지한 뒤 main 에서 다시 실행할 것."
+  echo "(그래도 지금 복사하려면 --force)"
+  [ "$FORCE" -eq 1 ] || exit 1
+fi
 ORIGIN=$(git -C "$REPO" remote get-url origin 2>/dev/null | sed 's/\.git$//' \
          || echo "https://github.com/bettercode-oss/admin-shell")
 TODAY=$(date +%Y-%m-%d)
