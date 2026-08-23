@@ -296,6 +296,12 @@ npm run dev
 
 Node 22 / npm 10 에서 개발했습니다.
 
+PR 을 올리면 CI 가 같은 셋(`tsc --noEmit` · `lint` · `build`)을 돌립니다. 소비자는 main 을
+떠다 쓰므로 main 이 깨지면 그대로 옮아갑니다.
+
+복사 단위(`src/components/admin-shell/`)를 고친 PR 은 `CHANGELOG.md` 도 함께 고쳐야
+통과합니다. 내부 구현이나 주석만 바뀌어 적을 것이 없으면 PR 에 `no-changelog` 라벨을 붙입니다.
+
 ### 알아둘 것
 
 - **`src/app/page.tsx` 는 컴포넌트 프리뷰/데모 전용입니다.** 제품 로직이나 실제 데이터 호출을
