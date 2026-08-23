@@ -137,7 +137,7 @@ shadcn ui: button, tooltip, sheet, separator
 |---|---|
 | `Topbar` / `TopbarTitle` / `TopbarActions` | 토프바와 슬롯 |
 | `TopbarNav` | 수평 메뉴. 사이드바 트리의 펼쳐진 가지를 옆으로 편 것 |
-| `TopbarNavItem` | 수평 메뉴 항목. `icon` / `active` / `asChild` |
+| `TopbarNavItem` | 수평 메뉴 항목. `icon` / `active` / `emphasis` / `asChild` |
 | `TopbarMenuButton` | 모바일 드로어를 여는 햄버거. 데스크톱에서는 숨는다 |
 
 **커맨드 팔레트**
@@ -215,9 +215,36 @@ shadcn ui: button, tooltip, sheet, separator
 사이드바에도 트리로 남아 있는 것을 전제하며, 그래서 사이드바를 4rem 으로 접어도 지금 구역의
 하위 메뉴는 토프바에 그대로 남습니다.
 
-`TopbarTitle` 과 역할이 다릅니다. `TopbarTitle` 은 지금 보고 있는 **페이지**의 `<h1>` 이고,
-`TopbarNav` 항목은 **갈 수 있는 곳**입니다. 둘 다 두면 "제목 = 페이지 / 메뉴 = 형제 화면"이
-됩니다.
+항목은 두 단계로 둘 수 있습니다. `emphasis="strong"` 이 섹션(대표) 항목이고, 기본값
+`"default"` 가 그 아래 화면들입니다. 한 줄에 링크가 여럿 늘어서면 두께 차이 없이는 어디가
+상위인지 읽히지 않습니다.
+
+```tsx
+<TopbarNav aria-label="사용자">
+  <TopbarNavItem emphasis="strong" asChild><span>사용자</span></TopbarNavItem>
+  <TopbarNavItem active asChild><Link href="/users">목록</Link></TopbarNavItem>
+  <TopbarNavItem asChild><Link href="/users/new">추가</Link></TopbarNavItem>
+</TopbarNav>
+```
+
+**`emphasis` 와 `active` 는 다른 축입니다.** `emphasis` 는 "어느 계층인가"(굵기와 글자색),
+`active` 는 "지금 보고 있는 곳인가"(배경)를 말합니다. 섹션이 늘 활성인 것도, 활성이 늘
+상위인 것도 아니라서 굵은 항목도 활성이 될 수 있고 그 반대도 됩니다.
+
+섹션 이름이 **링크가 아니면** 위처럼 `<span>` 을 꽂습니다. `asChild` 가 있으므로 이걸 위한
+컴포넌트가 따로 필요하지 않습니다.
+
+### 섹션 이름을 `TopbarTitle` 로 둘지 `emphasis` 로 둘지
+
+`TopbarTitle` 은 지금 보고 있는 **페이지**의 `<h1>` 이고, `TopbarNav` 항목은 **갈 수 있는
+곳**입니다. 섹션 이름은 둘 중 하나로만 두세요 — 둘 다 쓰면 같은 이름이 두 번 나옵니다.
+
+| | 언제 |
+|---|---|
+| `<TopbarTitle>` | 토프바에 `<h1>` 이 필요할 때. 문서 구조상 이쪽이 정석입니다 |
+| `<TopbarNavItem emphasis="strong">` | 섹션이 메뉴의 일부로 읽혀야 할 때. 링크여도 됩니다 |
+
+`TopbarTitle` 을 빼면 토프바에 `<h1>` 이 없으므로 본문이 자기 `<h1>` 을 가져야 합니다.
 
 사이드바와 달리 라벨을 `<span>` 으로 감쌀 필요가 없습니다. 그 관례는 접힘 상태에서 라벨을
 숨기는 셀렉터 하나 때문에 생긴 것이고 토프바에는 접힘이 없습니다.

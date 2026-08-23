@@ -35,7 +35,6 @@ import {
   TopbarMenuButton,
   TopbarNav,
   TopbarNavItem,
-  TopbarTitle,
 } from "@/components/admin-shell"
 import { Button } from "@/components/ui/button"
 
@@ -120,11 +119,20 @@ export default function Page() {
 
       <Topbar>
         <TopbarMenuButton />
-        <TopbarTitle>사용자</TopbarTitle>
-
         {/* 사이드바에서 펼쳐진 "사용자" 가지를 그대로 옆으로 편 것. 같은 링크가
-            사이드바에도 트리로 남아 있고, 접었을 때는 이쪽이 대신 보여준다. */}
+            사이드바에도 트리로 남아 있고, 접었을 때는 이쪽이 대신 보여준다.
+
+            굵은 항목이 섹션, 뒤따르는 것이 그 하위 화면이다. 여기서는 섹션 이름이
+            링크가 아니라 라벨이라 <span> 을 꽂았다 — 사이드바에서도 "사용자" 는
+            펼치는 트리거이지 링크가 아니다.
+
+            TopbarTitle 을 함께 두지 않는다. 섹션 이름을 두 번 쓰게 된다.
+            섹션이 링크가 아닐 때 TopbarTitle 로 처리하는 갈래는 README 의
+            조립 예제에 있다. */}
         <TopbarNav aria-label="사용자">
+          <TopbarNavItem emphasis="strong" asChild>
+            <span>사용자</span>
+          </TopbarNavItem>
           <TopbarNavItem active asChild>
             <Link href="/users">목록</Link>
           </TopbarNavItem>

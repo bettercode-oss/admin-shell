@@ -158,6 +158,29 @@ group 변형도 CSS 변수도 닿지 않으므로 JS 로 상태를 알아야 한
 `--accent-foreground`(0.205)가 `--foreground`(0.145)보다 **옅어서**, 그대로 쓰면 활성이
 비활성보다 흐려지는 역전이 생긴다.
 
+### `emphasis` 와 `active` 는 직교한다
+
+두 축이 **서로 다른 채널**을 쓴다. 그래서 네 상태가 모두 구분된다.
+
+| | `emphasis="default"` | `emphasis="strong"` |
+|---|---|---|
+| 보통 | `text-muted-foreground` / normal | `text-foreground` / `font-semibold` |
+| 활성 | `bg-accent` + `text-foreground` / normal | `bg-accent` + `text-foreground` / `font-semibold` |
+
+- `emphasis` = 글자 굵기 + 글자색 — 어느 계층인가
+- `active` = 배경 — 지금 보고 있는 곳인가
+
+섹션이 늘 활성인 것도, 활성이 늘 상위인 것도 아니다. 한 prop 에 뭉치면 `active` 를 주는
+순간 위계가 사라지거나 그 반대가 된다.
+
+`data-emphasis` 는 `data-active` 와 달리 **항상 렌더한다.** 플래그가 아니라 enum 이고,
+소비자가 `[data-emphasis=strong]` 으로 자기 스타일을 얹을 수 있는 안정적인 훅이 된다.
+셀렉터 형태도 다르다 — `data-[emphasis=strong]:` 은 값 매칭이고 `data-active:` 는 속성
+존재만 보는 축약형이다.
+
+**사이드바에는 이 구분이 없다.** 트리는 들여쓰기와 그룹 라벨(`SidebarGroup`)로 위계를
+이미 드러내는데, 토프바는 한 줄이라 들여쓸 자리가 없어 굵기로 대신한다.
+
 ## 중첩 메뉴
 
 `SidebarNavSubmenu` 는 사이드바 상태에 따라 두 가지로 렌더된다.
