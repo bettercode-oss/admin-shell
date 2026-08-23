@@ -2,7 +2,7 @@
 특정 프로젝트 로직이 전혀 없는 순수 레이아웃/UI 셸
 
 - 다른 프로젝트에 **가져다 쓰려면** → [복사해서 쓰는 방법](#다른-프로젝트에-복사해서-쓰는-방법)
-- 이미 쓰고 있고 **갱신하려면** → [CHANGELOG](CHANGELOG.md)
+- 이미 쓰고 있고 **갱신하려면** → [갱신하기](#갱신하기) · [CHANGELOG](CHANGELOG.md)
 - **이 저장소를 고치려면** → [개발하기](#이-저장소-자체를-개발하려면)
 
 ## Layout
@@ -45,11 +45,37 @@ Sidebar와 Topbar는 고정되고 ShellContent 영역만 스크롤됩니다.
 
 npm 패키지가 아니라 **파일을 복사해 쓰는** 방식입니다(shadcn/ui 와 같은 방식).
 
-> 이미 복사해 쓰고 있고 **갱신**하려는 것이라면 [CHANGELOG](CHANGELOG.md) 를 먼저 보세요.
-> 새로 설치할 shadcn 컴포넌트가 생겼는지, 공개 API 가 바뀌었는지가 거기 있습니다.
+> 이미 복사해 쓰고 있고 **갱신**하려는 것이라면 아래 [갱신하기](#갱신하기)로 가세요.
+> 최초 도입과는 다른 일입니다 — 덮기 전에 확인할 것이 있습니다.
 
 복사 단위는 `src/components/admin-shell/` **폴더 전체**입니다. 파일끼리 서로 참조하므로
 하나만 떼어가면 컴파일되지 않습니다.
+
+### 스크립트로 가져오기
+
+이 저장소를 클론해 두었다면 한 줄입니다.
+
+```bash
+git clone https://github.com/bettercode-oss/admin-shell
+admin-shell/scripts/sync-into.sh <소비 프로젝트 경로>
+```
+
+폴더를 복사하고 **어느 커밋에서 왔는지를 `VERSION` 에 기록**합니다. 그 기록이 있어야
+나중에 갱신할 때 무엇이 바뀌었는지, 내가 손댄 곳이 어디인지 알 수 있습니다.
+
+```
+source   https://github.com/bettercode-oss/admin-shell
+ref      main
+commit   0f21a50
+date     2026-08-23
+```
+
+폴더 위치가 다르면 두 번째 인자로 줍니다 — `sync-into.sh ../admin app/components/admin-shell`.
+손으로 복사해도 되지만 그 경우 `VERSION` 이 없어 갱신할 때 확인 단계를 쓸 수 없습니다.
+
+**`main` 이나 태그에서만 복사합니다.** 기능 브랜치에서 실행하면 막힙니다 — 이 저장소는
+squash-merge 라 브랜치 커밋이 머지된 뒤 `main` 이력에 남지 않고, 그 SHA 를 `VERSION` 에
+적으면 다음 갱신 때 기준점을 잃습니다.
 
 ### 전제 조건
 
@@ -112,6 +138,52 @@ shadcn ui: button, tooltip, sheet, separator
 
 `useShellState()` 는 Provider 없이도 동작합니다. `AdminShell` 없이 `Sidebar` 만 가져가도
 컴포넌트가 스스로 상태를 들고 동작합니다.
+
+## 갱신하기
+
+최초 도입과 **다른 일**입니다. 덮어쓰기 전에 두 가지를 알아야 합니다 — 그 사이 무엇이
+바뀌었는지, 그리고 **내가 이 폴더에 손댄 곳이 있는지**. 소비처가 둘 이상이 되면 남의
+수정분이 조용히 사라지는 것이 실제 위험입니다.
+
+```bash
+cd admin-shell && git pull
+scripts/sync-into.sh <소비 프로젝트 경로>
+```
+
+스크립트가 순서대로 합니다.
+
+1. 대상의 `VERSION` 을 읽어 **그 커밋의 트리와 대상 폴더를 비교**합니다.
+   다르면 소비처가 손댄 것이므로 **출력하고 멈춥니다**(`--force` 로만 진행).
+   upstream 이 앞서 있으면 폴더끼리 비교해봐야 어차피 다르므로, 온 곳과 비교해야 합니다
+2. 그 커밋 이후 복사 단위에 들어온 커밋 목록을 보여줍니다
+3. 복사하고 `VERSION` 을 새로 씁니다
+
+그다음 [CHANGELOG](CHANGELOG.md) 에서 **새로 설치할 shadcn 컴포넌트**가 생겼는지 확인하고,
+소비 프로젝트에서 빌드합니다.
+
+손으로 복사해 쓰던 프로젝트에는 `VERSION` 이 없습니다. 출처 커밋을 안다면 한 번만
+알려주면 그때부터 위 확인이 됩니다.
+
+```bash
+scripts/sync-into.sh --from <커밋> <소비 프로젝트 경로>
+```
+
+모른다면 `--force` 로 진행합니다. 확인 없이 덮는다는 뜻이므로, 손댄 곳이 있는지 먼저
+눈으로 보는 편이 좋습니다.
+
+### 스크립트 없이
+
+```bash
+git clone --depth 50 https://github.com/bettercode-oss/admin-shell /tmp/admin-shell
+diff -r -x VERSION /tmp/admin-shell/src/components/admin-shell \
+                   <소비 프로젝트>/src/components/admin-shell
+```
+
+이 비교에는 **upstream 의 변경과 내가 손댄 것이 섞여 나옵니다.** 어느 쪽인지는 직접
+가려야 합니다. `VERSION` 이 있다면 `git -C /tmp/admin-shell log --oneline <commit>..HEAD --
+src/components/admin-shell` 로 upstream 쪽 변경을 먼저 파악해두면 가리기 쉽습니다.
+
+확인이 끝나면 폴더를 덮고, CHANGELOG 에서 새 의존을 확인합니다.
 
 ## 컴포넌트
 
