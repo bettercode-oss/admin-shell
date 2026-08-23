@@ -43,6 +43,11 @@ transition-[grid-template-columns] duration-200 ease-out
 변수가 없으면 `color-mix` 선언 전체가 무효가 되어 활성 배경이 사라지는데,
 `sidebar.tsx` 만 복사해간 프로젝트가 그 상황이기 때문이다.
 
+**이 변수는 사이드바 전용이다.** 토프바(`TopbarNavItem`)는 `color-mix` 를 쓰지 않고
+`bg-accent` 를 그대로 쓴다. 사이드바가 색을 섞어야 했던 이유는 `--sidebar`(0.985)와
+`--sidebar-accent`(0.97)의 명도차가 0.015 뿐이라서인데, 토프바가 놓인 `--background` 와
+`--accent` 의 차이는 라이트 0.03 · 다크 0.124 로 이미 그 두 배 이상이다.
+
 ## Component Tree
 
 ```
@@ -57,7 +62,12 @@ AdminShell                         TooltipProvider + ShellRoot(상태) + 그리�
 │   │       ├── SidebarNavItem     icon / active / tooltip / asChild
 │   │       └── SidebarNavSubmenu  2단계 메뉴 (SidebarNavItem 들을 감싼다)
 │   └── SidebarFooter
-├── Topbar (TopbarMenuButton / TopbarTitle / TopbarActions)
+├── Topbar
+│   ├── TopbarMenuButton       좁은 화면에서만 (mobile-drawer.tsx)
+│   ├── TopbarTitle            지금 보고 있는 페이지의 <h1>
+│   ├── TopbarNav              수평 메뉴 <nav><ul>
+│   │   └── TopbarNavItem      icon / active / asChild
+│   └── TopbarActions
 ├── ShellContent (children, min-h-0 overflow-y-auto)
 └── CommandPalette              내용은 소비자가 children 으로 조립
 ```
@@ -80,6 +90,10 @@ AdminShell                         TooltipProvider + ShellRoot(상태) + 그리�
 접힘 상태는 셸 루트의 `data-collapsed` 를 `group-data-collapsed/shell:` 변형으로 읽어
 **CSS 만으로** 처리한다. 그래서 Sidebar/Topbar 에 상태가 필요 없다.
 
+`asChild` 에 쓰는 radix `Slot` 은 클라이언트 경계를 만들지 않는다 — `"use client"` 가 없고
+쓰는 훅이 `useCallback` 하나뿐이라 RSC 안에서 돈다. `sidebar.tsx` 와 `topbar.tsx` 가 둘 다
+`Slot` 을 쓰면서 서버 컴포넌트로 남는 이유다.
+
 예외는 두 가지이고 이유가 같다 — **포털로 `body` 에 렌더되어 셸 바깥에 놓이는 것들**이다.
 group 변형도 CSS 변수도 닿지 않으므로 JS 로 상태를 알아야 한다.
 
@@ -91,6 +105,58 @@ group 변형도 CSS 변수도 닿지 않으므로 JS 로 상태를 알아야 한
 포털 밖에 놓이는 덕을 보기도 한다. 팝오버 안의 `SidebarNavItem` 은
 `group-data-collapsed/shell` 이 닿지 않아 라벨이 그대로 보인다 — 접힘용 분기를
 따로 쓰지 않아도 된다.
+
+## 토프바 수평 메뉴
+
+`TopbarNav` 는 사이드바 트리의 **지금 펼쳐진 가지**를 옆으로 편 것이다. 같은 링크가 사이드바와
+토프바 양쪽에 중복으로 존재하게 되는데 의도한 것이다 — 접근 경로가 둘일 뿐이고, 두 `<nav>` 의
+`aria-label` 이 다르면(`"Sidebar"` / `"Topbar"`) 스크린 리더에서 구분된다. 사이드바를 4rem 으로
+접으면 하위 메뉴가 팝오버로만 닿는데, 그때 토프바 메뉴가 같은 것을 그대로 보여준다.
+
+### `flex-1` 이 제목과 액션을 지킨다
+
+`TopbarNav` 의 `flex-1`(= `flex:1 1 0%`)은 지워도 될 것처럼 보이지만 **없으면 레이아웃이 무너진다.**
+
+없으면 nav 의 기준 크기가 내용 크기가 되고, 메뉴가 길어질 때 축소가 기준 크기에 비례해
+나뉜다. `TopbarTitle` 은 `truncate`(`overflow:hidden`) 라 자동 최소 크기가 0 이므로 **긴 메뉴가
+페이지 제목을 같이 뭉갠다.** `flex-1` 이면 nav 의 기준 크기가 0 이라 줄 자체가 넘치지 않고,
+초과분은 nav 안에서만 가로로 스크롤된다.
+
+실측(항목 3개, 헤더 폭을 줄여가며):
+
+| 헤더 | 제목 | nav | 액션 |
+|---|---|---|---|
+| 900px | 42 | 664 | 146 |
+| 460px | 42 | 224 | 146 |
+| 380px | 42 | 144 (스크롤) | 146 |
+| 320px | 42 | 84 (스크롤) | 146 |
+| 240px | 38 | 8 | 146 |
+
+320px 까지는 제목과 액션이 온전하고 nav 만 줄며 스크롤된다. 240px 아래에서는 nav 가 더 줄어들
+수 없어(기준 크기 0) 제목이 축소를 떠안는데, 실제 기기 폭 밖이라 그대로 둔다.
+
+부작용이 하나 있다. 자유 공간이 0 이 되어 `TopbarActions` 의 `ml-auto` 가 흡수할 게 없어진다.
+대신 nav 가 늘어나며 액션을 오른쪽 끝으로 미므로 결과 위치는 같고, `TopbarNav` 를 쓰지 않는
+기존 조립에서는 `ml-auto` 가 지금까지처럼 동작한다.
+
+### 포커스 링과 스크롤바
+
+`overflow-x-auto` 는 스크롤바 유무와 무관하게 **패딩 박스 네 변 모두에서 클립**한다.
+항목의 `focus-visible:ring-3`(3px)이 잘리므로 `-mx-1 px-1 py-1` 로 안쪽에 4px 자리를 두고
+가로는 음수 마진으로 시각적 위치를 되돌린다.
+
+스크롤바는 감춘다(`[scrollbar-width:none]`). 3.5rem 막대 안의 가로 스크롤바는 세로 공간을
+먹는다. 스크롤 자체는 살아 있고 Tab 으로 이동하면 브라우저가 항목을 스크롤해 넣는다.
+
+### hover 는 글자색, 활성은 배경
+
+사이드바는 hover 와 활성을 모두 배경으로 표현할 수 있다. 활성 쪽이 `color-mix` 로 한 단계
+더 진하기 때문이다. 토프바는 `color-mix` 를 쓰지 않으므로(위 「CSS Variables」) 둘 다 배경을
+쓰면 같은 색이 된다. 그래서 채널을 나눈다 — hover 는 `text-foreground`, 활성은 `bg-accent`.
+
+활성 글자색이 `accent-foreground` 가 아니라 `foreground` 인 것도 이유가 있다. 라이트에서
+`--accent-foreground`(0.205)가 `--foreground`(0.145)보다 **옅어서**, 그대로 쓰면 활성이
+비활성보다 흐려지는 역전이 생긴다.
 
 ## 중첩 메뉴
 
@@ -167,6 +233,8 @@ max-md:[grid-template-areas:'topbar''content']
 - 드로어가 닫혀 있으면 사이드바는 DOM 에 없다(Sheet 가 언마운트한다).
   모바일에서 메뉴 링크가 문서에 존재하지 않는다는 뜻이다
 - 접기 토글은 `max-md:hidden` — 드로어에서는 접을 대상이 없다
+- 토프바 수평 메뉴는 **감추지 않는다.** 폭이 모자라면 제 안에서 가로로 스크롤되며, 무엇을
+  감출지는 소비자가 정할 일이라 기본값으로 결정하지 않는다(`className="max-md:hidden"`)
 
 ## 확장 시 주의점
 

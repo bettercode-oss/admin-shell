@@ -80,12 +80,13 @@ npx shadcn@latest add button tooltip sheet separator collapsible popover command
 | `sidebar-submenu.tsx` | `shell-context`, `sidebar-styles` | collapsible, popover | lucide, `cn()` |
 | `mobile-drawer.tsx` | `shell-context` | button, sheet | lucide, `cn()` |
 | `command-palette.tsx` | `shell-context` | button, command | lucide, `cn()` |
-| `topbar.tsx` | — | — | `cn()` |
+| `topbar.tsx` | — | — | `radix-ui`(Slot), `cn()` |
 | `shell-context.tsx` | — | — | — |
 | `sidebar-styles.ts` | — | — | — |
 
-`shell-context.tsx` 와 `sidebar-styles.ts` 는 외부 의존이 없고, `topbar.tsx` 는 `cn()` 하나만
-필요하므로 이 셋은 단독으로 떼어가도 됩니다.
+`shell-context.tsx` 와 `sidebar-styles.ts` 는 외부 의존이 아예 없습니다. `topbar.tsx` 도 같은
+폴더의 다른 파일을 참조하지 않아 단독으로 떼어갈 수 있지만, `cn()` 과 `radix-ui`(Slot) 가
+필요합니다 — `TopbarNavItem` 의 `asChild` 가 씁니다. 셋 다 shadcn 컴포넌트는 필요 없습니다.
 
 ### 사이드바만 쓰고 싶다면
 
@@ -135,6 +136,8 @@ shadcn ui: button, tooltip, sheet, separator
 | | |
 |---|---|
 | `Topbar` / `TopbarTitle` / `TopbarActions` | 토프바와 슬롯 |
+| `TopbarNav` | 수평 메뉴. 사이드바 트리의 펼쳐진 가지를 옆으로 편 것 |
+| `TopbarNavItem` | 수평 메뉴 항목. `icon` / `active` / `asChild` |
 | `TopbarMenuButton` | 모바일 드로어를 여는 햄버거. 데스크톱에서는 숨는다 |
 
 **커맨드 팔레트**
@@ -184,7 +187,11 @@ shadcn ui: button, tooltip, sheet, separator
 
   <Topbar>
     <TopbarMenuButton />
-    <TopbarTitle>대시보드</TopbarTitle>
+    <TopbarTitle>사용자</TopbarTitle>
+    <TopbarNav aria-label="사용자">
+      <TopbarNavItem active asChild><Link href="/users">목록</Link></TopbarNavItem>
+      <TopbarNavItem asChild><Link href="/users/new">추가</Link></TopbarNavItem>
+    </TopbarNav>
     <TopbarActions>{/* ... */}</TopbarActions>
   </Topbar>
 
@@ -201,6 +208,30 @@ shadcn ui: button, tooltip, sheet, separator
   </CommandPalette>
 </AdminShell>
 ```
+
+### 토프바 수평 메뉴
+
+`TopbarNav` 는 사이드바 트리에서 **지금 펼쳐진 가지**를 옆으로 펴놓은 것입니다. 같은 링크가
+사이드바에도 트리로 남아 있는 것을 전제하며, 그래서 사이드바를 4rem 으로 접어도 지금 구역의
+하위 메뉴는 토프바에 그대로 남습니다.
+
+`TopbarTitle` 과 역할이 다릅니다. `TopbarTitle` 은 지금 보고 있는 **페이지**의 `<h1>` 이고,
+`TopbarNav` 항목은 **갈 수 있는 곳**입니다. 둘 다 두면 "제목 = 페이지 / 메뉴 = 형제 화면"이
+됩니다.
+
+사이드바와 달리 라벨을 `<span>` 으로 감쌀 필요가 없습니다. 그 관례는 접힘 상태에서 라벨을
+숨기는 셀렉터 하나 때문에 생긴 것이고 토프바에는 접힘이 없습니다.
+
+폭이 모자라면 **메뉴가 제 안에서 가로로 스크롤**됩니다. 조용히 잘리지 않고, 제목과 액션도
+밀려 찌그러지지 않습니다(`TopbarNav` 가 `flex-1` 로 남는 폭을 가져가기 때문입니다).
+좁은 화면에서 아예 감추려면 — 드로어의 사이드바 트리가 같은 메뉴를 담당합니다 —
+
+```tsx
+<TopbarNav className="max-md:hidden">
+```
+
+내용 크기만 차지하게 하려면 `className="flex-none"` 입니다. 다만 그러면 메뉴가 길어질 때
+`TopbarTitle` 이 함께 줄어듭니다.
 
 세 가지가 이 라이브러리의 전제입니다.
 

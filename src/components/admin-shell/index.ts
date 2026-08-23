@@ -29,4 +29,10 @@ export {
   SidebarNavItem,
   SidebarFooter,
 } from "./sidebar"
-export { Topbar, TopbarTitle, TopbarActions } from "./topbar"
+export {
+  Topbar,
+  TopbarTitle,
+  TopbarNav,
+  TopbarNavItem,
+  TopbarActions,
+} from "./topbar"
