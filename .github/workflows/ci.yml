@@ -1,0 +1,87 @@
+name: CI
+
+# 재복사의 전제는 "main 은 언제나 빌드된다" 이다. 소비자는 main 을 떠다가 자기
+# 프로젝트에 붙이므로(README 「복사해서 쓰는 방법」), 여기가 깨지면 그대로 옮아간다.
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+# 같은 PR 에 새 커밋이 오면 이전 실행은 접는다.
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: 타입 · 린트 · 빌드
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          # README 「이 저장소 자체를 개발하려면」이 적어둔 개발 환경과 맞춘다.
+          node-version: "22"
+          cache: npm
+
+      - run: npm ci
+
+      # PageProps / LayoutProps 는 .next/types 에 생성되는 전역 타입이라, 깨끗한
+      # 체크아웃에서는 먼저 만들어야 tsc 가 돈다. 로컬에서 통과하는 이유는 .next 가
+      # 남아 있어서다 — 이 저장소의 첫 CI 실행이 실제로 여기서 걸렸다.
+      # 문서: next/dist/docs 「Types are generated during next dev, next build or next typegen」
+      - name: 라우트 타입 생성
+        run: npx next typegen
+
+      # build 가 타입 검사를 포함하지만 따로 둔다. 실패 지점이 갈려 원인이 빨리 보이고,
+      # 셋 다 수 초라 나눠도 비용이 없다.
+      - name: 타입 검사
+        run: npx tsc --noEmit
+
+      - name: 린트
+        run: npm run lint
+
+      - name: 빌드
+        run: npm run build
+
+  changelog:
+    name: CHANGELOG 갱신 확인
+    # 복사 단위를 고친 PR 은 CHANGELOG 도 고쳐야 한다. 원칙이 CLAUDE.md 에만 있으면
+    # 결국 빠지므로 여기서 막는다.
+    #
+    # 주석만 고치는 PR(#37 같은)까지 CHANGELOG 를 요구하면 규칙이 형식이 되고 내용
+    # 없는 항목이 쌓인다. no-changelog 라벨을 붙이면 건너뛴다.
+    if: >-
+      github.event_name == 'pull_request' &&
+      !contains(github.event.pull_request.labels.*.name, 'no-changelog')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # 병합 기준점을 찾으려면 전체 이력이 필요하다.
+          fetch-depth: 0
+
+      - name: 복사 단위를 고쳤으면 CHANGELOG 도 고쳤는지
+        env:
+          BASE: ${{ github.base_ref }}
+        run: |
+          set -eu
+          changed=$(git diff --name-only "origin/$BASE...HEAD")
+
+          echo "이 PR 이 바꾼 파일:"
+          echo "$changed" | sed 's/^/  /'
+          echo
+
+          if ! echo "$changed" | grep -q '^src/components/admin-shell/'; then
+            echo "복사 단위(src/components/admin-shell/)를 건드리지 않았다 — 건너뛴다."
+            exit 0
+          fi
+
+          if echo "$changed" | grep -qx 'CHANGELOG.md'; then
+            echo "복사 단위와 CHANGELOG.md 가 함께 바뀌었다."
+            exit 0
+          fi
+
+          echo "::error file=CHANGELOG.md::복사 단위를 고쳤는데 CHANGELOG.md 가 그대로다. 소비자가 재복사 전에 읽는 문서라 같은 PR 에서 갱신한다(CLAUDE.md 「문서 갱신 원칙」). 새 의존 · 공개 API · 파일 추가삭제 · 클래스와 CSS 변수 중 해당하는 것을 Unreleased 에 적을 것. 내부 구현만 바뀐 변경이라면 PR 에 no-changelog 라벨을 붙이면 건너뛴다."
+          exit 1
