@@ -19,11 +19,15 @@
 - 셸 레이아웃을 건드리는 작업이면 ARCHITECTURE.md를 먼저 읽을 것
 
 ## 문서 갱신 원칙
-두 문서는 독자가 다르므로 갱신 조건도 다르다. ARCHITECTURE.md는 셸을 고치는 사람,
-README는 셸을 쓰는 사람을 위한 것이다.
+세 문서는 독자가 다르므로 갱신 조건도 다르다. ARCHITECTURE.md는 셸을 고치는 사람,
+README는 셸을 쓰기 시작하는 사람, CHANGELOG.md는 이미 쓰고 있고 갱신하려는 사람을
+위한 것이다.
 
 - 컴포넌트 구조나 동작 방식이 바뀌면 ARCHITECTURE.md도 같은 PR 또는 후속 PR에서 갱신한다
 - 공개 API가 바뀌면 README도 같은 PR에서 갱신한다 — export하는 컴포넌트·훅의 추가/삭제,
   props, CSS 변수, 복사할 때 필요한 파일이나 shadcn 컴포넌트가 여기 해당한다
-- 내부 구현만 바뀌고 공개 API가 그대로면 README는 건드리지 않는다
+- 공개 API 나 의존이 바뀌면 CHANGELOG.md 도 같은 PR에서 갱신한다 — 재복사하는 소비자가
+  덮기 전에 읽는 문서다. README와 대상이 겹치지만 독자의 질문이 다르다. README는
+  "어떻게 쓰나", CHANGELOG는 "덮으면 뭐가 달라지나"
+- 내부 구현만 바뀌고 공개 API가 그대로면 README도 CHANGELOG도 건드리지 않는다
 - 갱신 시 문서의 서술과 실제 코드를 항목별로 대조해서 확인한다
