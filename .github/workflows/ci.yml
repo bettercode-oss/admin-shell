@@ -27,6 +27,13 @@ jobs:
 
       - run: npm ci
 
+      # PageProps / LayoutProps 는 .next/types 에 생성되는 전역 타입이라, 깨끗한
+      # 체크아웃에서는 먼저 만들어야 tsc 가 돈다. 로컬에서 통과하는 이유는 .next 가
+      # 남아 있어서다 — 이 저장소의 첫 CI 실행이 실제로 여기서 걸렸다.
+      # 문서: next/dist/docs 「Types are generated during next dev, next build or next typegen」
+      - name: 라우트 타입 생성
+        run: npx next typegen
+
       # build 가 타입 검사를 포함하지만 따로 둔다. 실패 지점이 갈려 원인이 빨리 보이고,
       # 셋 다 수 초라 나눠도 비용이 없다.
       - name: 타입 검사
