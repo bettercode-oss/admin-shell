@@ -96,11 +96,25 @@ function TopbarNav({
  * 때문이다. 둘 다 배경을 쓰면 같은 색이 되어 구분이 사라진다. 사이드바가
  * hover 와 활성 모두 배경으로 표현할 수 있는 것은 활성 쪽이 color-mix 로
  * 한 단계 더 진하기 때문인데, 토프바는 아래 이유로 color-mix 를 쓰지 않는다.
+ *
+ * 두 축이 서로 다른 채널을 쓴다. 덕분에 네 상태가 모두 구분된다.
+ *
+ *   emphasis = 글자 굵기 + 글자색   (어느 계층인가)
+ *   active   = 배경                 (지금 보고 있는 곳인가)
+ *
+ * 섹션이 늘 활성인 것도, 활성이 늘 상위인 것도 아니라 한 prop 에 뭉치면
+ * active 를 주는 순간 위계가 사라지거나 그 반대가 된다.
  */
 const topbarNavItemClass = [
   "flex h-8 items-center gap-2 rounded-md px-2.5 text-sm whitespace-nowrap outline-none transition-colors",
   "text-muted-foreground hover:text-foreground",
   "focus-visible:ring-3 focus-visible:ring-ring/50",
+  // 강조(섹션) 항목. 사이드바는 들여쓰기와 그룹 라벨로 위계를 드러내지만
+  // 토프바에는 들여쓸 자리가 없어 굵기와 색으로 표현한다.
+  //
+  // 값 매칭 형태(data-[emphasis=strong]:)다. 이 저장소가 자주 쓰는
+  // data-active: 는 속성이 있기만 하면 되는 축약형이라 서로 다르다.
+  "data-[emphasis=strong]:font-semibold data-[emphasis=strong]:text-foreground",
   // 활성 배경에 color-mix 를 쓰지 않는다. 사이드바가 그걸 쓰는 이유는
   // --sidebar(0.985)와 --sidebar-accent(0.97)의 명도차가 0.015 뿐이라서인데,
   // 토프바는 --background 와 --accent 의 차이가 라이트 0.03 · 다크 0.124 로
@@ -121,6 +135,11 @@ const topbarNavItemClass = [
  *     <Link href="/games">게임</Link>
  *   </TopbarNavItem>
  *
+ * 섹션(대표) 항목은 emphasis="strong" 이다. 링크가 아니라 라벨이면 <span> 을 꽂는다 —
+ * asChild 가 있으므로 새 컴포넌트가 필요 없다.
+ *
+ *   <TopbarNavItem emphasis="strong" asChild><span>운영</span></TopbarNavItem>
+ *
  * 사이드바와 달리 라벨을 <span> 으로 감쌀 필요가 없다. 그 관례는 접힘 상태에서
  * 라벨을 숨기는 셀렉터([&>span]:hidden) 하나 때문에 생긴 것이고 토프바에는
  * 접힘이 없다. 감싸도 문제는 없다.
@@ -129,12 +148,15 @@ function TopbarNavItem({
   className,
   icon,
   active,
+  emphasis = "default",
   asChild,
   children,
   ...props
 }: React.ComponentProps<"a"> & {
   icon?: React.ReactNode
   active?: boolean
+  /** 섹션/대표 항목이면 "strong". active 와는 다른 축이다. */
+  emphasis?: "default" | "strong"
   asChild?: boolean
 }) {
   const Comp = asChild ? Slot.Root : "a"
@@ -142,6 +164,10 @@ function TopbarNavItem({
   return (
     <li data-slot="topbar-nav-item">
       <Comp
+        // data-active 와 달리 항상 렌더한다. 플래그가 아니라 enum 이고,
+        // 소비자가 [data-emphasis=strong] 으로 자기 스타일을 얹을 수 있는
+        // 안정적인 훅이 되기 때문이다.
+        data-emphasis={emphasis}
         data-active={active || undefined}
         aria-current={active ? "page" : undefined}
         className={cn(topbarNavItemClass, className)}
